@@ -1,1 +1,1 @@
-Fix: next.config.ts を next.config.mjs に変換（Next.js 14互換）
+Fix: Supabase cookie型エラーを修正
