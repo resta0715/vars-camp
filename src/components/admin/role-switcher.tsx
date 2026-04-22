@@ -41,10 +41,19 @@ export function RoleSwitcher({ currentRole, userId }: RoleSwitcherProps) {
       }
 
       setActiveRole(newRole);
-      setMessage({ type: "success", text: `${roles.find(r => r.value === newRole)?.label}に切り替えました` });
+      const label = roles.find(r => r.value === newRole)?.label;
+      setMessage({ type: "success", text: `${label}に切り替え中...` });
       setSwitching(null);
 
-      setTimeout(() => window.location.reload(), 800);
+      const destinations: Record<string, string> = {
+        admin: "/admin",
+        instructor: "/instructor",
+        subscriber: "/dashboard",
+        free: "/dashboard",
+      };
+      setTimeout(() => {
+        window.location.href = destinations[newRole] || "/dashboard";
+      }, 500);
     } catch (e: any) {
       setMessage({ type: "error", text: e.message || "通信エラー" });
       setSwitching(null);
