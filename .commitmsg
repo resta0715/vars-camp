@@ -1,1 +1,1 @@
-Fix: Supabase cookie型エラーを修正
+Fix: useSearchParams を Suspense boundary で囲む

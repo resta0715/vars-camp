@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
@@ -27,7 +27,7 @@ function LineIcon() {
   );
 }
 
-export default function LoginPage() {
+function LoginForm() {
   const searchParams = useSearchParams();
   const isSignup = searchParams.get("mode") === "signup";
   const redirect = searchParams.get("redirect") || "/dashboard";
@@ -45,13 +45,10 @@ export default function LoginPage() {
         },
       });
     } else {
-      // LINE は Supabase の Custom OIDC Provider として設定
-      // Supabase Dashboard > Authentication > Providers で LINE を追加
       await supabase.auth.signInWithOAuth({
-        provider: "kakao" as any, // LINE はカスタムプロバイダーとして設定が必要
+        provider: "kakao" as any,
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback?redirect=${redirect}`,
-          // LINE Login 用のスコープ
           scopes: "profile openid email",
         },
       });
@@ -59,76 +56,84 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 to-brand-100 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <Link href="/" className="mx-auto mb-4 flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-brand">
-              <BookOpen className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-gray-900">
-              vars <span className="text-brand-600">camp</span>
-            </span>
-          </Link>
-          <CardTitle className="text-xl">
-            {isSignup ? "アカウント作成" : "ログイン"}
-          </CardTitle>
-          <CardDescription>
-            {isSignup
-              ? "Google または LINE でかんたん登録"
-              : "アカウントにログインしてください"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full justify-center gap-3 text-base"
-            onClick={() => handleLogin("google")}
-            disabled={loading !== null}
-          >
-            <GoogleIcon />
-            {loading === "google" ? "接続中..." : "Google でログイン"}
-          </Button>
-
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full justify-center gap-3 text-base border-[#06C755] text-[#06C755] hover:bg-[#06C755]/5"
-            onClick={() => handleLogin("line")}
-            disabled={loading !== null}
-          >
-            <LineIcon />
-            {loading === "line" ? "接続中..." : "LINE でログイン"}
-          </Button>
-
-          <div className="pt-4 text-center">
-            {isSignup ? (
-              <p className="text-sm text-gray-500">
-                すでにアカウントをお持ちですか？{" "}
-                <Link href="/auth/login" className="text-brand-600 hover:underline">
-                  ログイン
-                </Link>
-              </p>
-            ) : (
-              <p className="text-sm text-gray-500">
-                アカウントをお持ちでないですか？{" "}
-                <Link href="/auth/login?mode=signup" className="text-brand-600 hover:underline">
-                  無料で登録
-                </Link>
-              </p>
-            )}
+    <Card className="w-full max-w-md">
+      <CardHeader className="text-center">
+        <Link href="/" className="mx-auto mb-4 flex items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-brand">
+            <BookOpen className="h-5 w-5 text-white" />
           </div>
+          <span className="text-2xl font-bold text-gray-900">
+            vars <span className="text-brand-600">camp</span>
+          </span>
+        </Link>
+        <CardTitle className="text-xl">
+          {isSignup ? "アカウント作成" : "ログイン"}
+        </CardTitle>
+        <CardDescription>
+          {isSignup
+            ? "Google または LINE でかんたん登録"
+            : "アカウントにログインしてください"}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Button
+          variant="outline"
+          size="lg"
+          className="w-full justify-center gap-3 text-base"
+          onClick={() => handleLogin("google")}
+          disabled={loading !== null}
+        >
+          <GoogleIcon />
+          {loading === "google" ? "接続中..." : "Google でログイン"}
+        </Button>
 
-          <p className="text-center text-xs text-gray-400 pt-2">
-            続行することで、
-            <Link href="/terms" className="underline">利用規約</Link>
-            および
-            <Link href="/privacy" className="underline">プライバシーポリシー</Link>
-            に同意したものとみなされます。
-          </p>
-        </CardContent>
-      </Card>
+        <Button
+          variant="outline"
+          size="lg"
+          className="w-full justify-center gap-3 text-base border-[#06C755] text-[#06C755] hover:bg-[#06C755]/5"
+          onClick={() => handleLogin("line")}
+          disabled={loading !== null}
+        >
+          <LineIcon />
+          {loading === "line" ? "接続中..." : "LINE でログイン"}
+        </Button>
+
+        <div className="pt-4 text-center">
+          {isSignup ? (
+            <p className="text-sm text-gray-500">
+              すでにアカウントをお持ちですか？{" "}
+              <Link href="/auth/login" className="text-brand-600 hover:underline">
+                ログイン
+              </Link>
+            </p>
+          ) : (
+            <p className="text-sm text-gray-500">
+              アカウントをお持ちでないですか？{" "}
+              <Link href="/auth/login?mode=signup" className="text-brand-600 hover:underline">
+                無料で登録
+              </Link>
+            </p>
+          )}
+        </div>
+
+        <p className="text-center text-xs text-gray-400 pt-2">
+          続行することで、
+          <Link href="/terms" className="underline">利用規約</Link>
+          および
+          <Link href="/privacy" className="underline">プライバシーポリシー</Link>
+          に同意したものとみなされます。
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 to-brand-100 px-4">
+      <Suspense fallback={<div className="text-gray-400">読み込み中...</div>}>
+        <LoginForm />
+      </Suspense>
     </div>
   );
 }
