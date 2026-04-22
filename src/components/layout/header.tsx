@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X, Calendar, BookOpen, LogIn } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Menu, X, Calendar, BookOpen, LogIn, LogOut, Shield, GraduationCap, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
 
 interface HeaderProps {
   user?: { full_name: string; avatar_url: string; role: string } | null;
@@ -11,6 +13,14 @@ interface HeaderProps {
 
 export function Header({ user }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/80 backdrop-blur-lg">
@@ -41,17 +51,36 @@ export function Header({ user }: HeaderProps) {
             研修一覧
           </Link>
           {user ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {user.role === "admin" && (
+                <Link href="/admin">
+                  <Button variant="outline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50">
+                    <Shield className="mr-1.5 h-3.5 w-3.5" />
+                    管理パネル
+                  </Button>
+                </Link>
+              )}
               {(user.role === "instructor" || user.role === "admin") && (
                 <Link href="/instructor">
                   <Button variant="outline" size="sm">
+                    <GraduationCap className="mr-1.5 h-3.5 w-3.5" />
                     講師パネル
                   </Button>
                 </Link>
               )}
               <Link href="/dashboard">
-                <Button size="sm">マイページ</Button>
+                <Button size="sm">
+                  <User className="mr-1.5 h-3.5 w-3.5" />
+                  マイページ
+                </Button>
               </Link>
+              <button
+                onClick={handleLogout}
+                className="ml-1 rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                title="ログアウト"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
@@ -100,11 +129,37 @@ export function Header({ user }: HeaderProps) {
               研修一覧
             </Link>
             {user ? (
-              <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                <Button className="w-full" size="sm">
-                  マイページ
-                </Button>
-              </Link>
+              <>
+                {user.role === "admin" && (
+                  <Link
+                    href="/admin"
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    管理パネル
+                  </Link>
+                )}
+                {(user.role === "instructor" || user.role === "admin") && (
+                  <Link
+                    href="/instructor"
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    講師パネル
+                  </Link>
+                )}
+                <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
+                  <Button className="w-full" size="sm">
+                    マイページ
+                  </Button>
+                </Link>
+                <button
+                  onClick={() => { setMobileOpen(false); handleLogout(); }}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 text-left"
+                >
+                  ログアウト
+                </button>
+              </>
             ) : (
               <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
                 <Button className="w-full" size="sm">
