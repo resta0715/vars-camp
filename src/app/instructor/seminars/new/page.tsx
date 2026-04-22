@@ -45,6 +45,8 @@ export default function NewSeminarPage() {
     duration_minutes: 60,
     capacity: "",
     location: "",
+    zoom_url: "",
+    recording_url: "",
     price: 0,
     tags: "",
   });
@@ -78,6 +80,8 @@ export default function NewSeminarPage() {
       duration_minutes: form.duration_minutes,
       capacity: form.capacity ? parseInt(form.capacity) : null,
       location: form.location || null,
+      zoom_url: form.zoom_url || null,
+      recording_url: form.recording_url || null,
       price: form.price,
       tags: form.tags ? form.tags.split(",").map((t) => t.trim()) : [],
       is_published: publish,
@@ -273,6 +277,51 @@ export default function NewSeminarPage() {
               </CardContent>
             </Card>
           )}
+
+          {/* Zoom / Recording URL */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">配信・動画設定</CardTitle>
+              <CardDescription>
+                ライブ研修の場合はZoom URLを、オンデマンドの場合は動画URLを設定してください。
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {form.seminar_type === "realtime" && (
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                    Zoom ミーティングURL
+                  </label>
+                  <Input
+                    value={form.zoom_url}
+                    onChange={(e) => update("zoom_url", e.target.value)}
+                    placeholder="https://zoom.us/j/..."
+                  />
+                  <p className="mt-1.5 text-xs text-gray-500">
+                    予約者に開始30分前から表示されます。後から追加も可能です。
+                  </p>
+                </div>
+              )}
+              {form.seminar_type === "ondemand" && (
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                    動画URL（YouTube限定公開 / Vimeo）
+                  </label>
+                  <Input
+                    value={form.recording_url}
+                    onChange={(e) => update("recording_url", e.target.value)}
+                    placeholder="https://youtu.be/... または https://vimeo.com/..."
+                  />
+                  <p className="mt-1.5 text-xs text-gray-500">
+                    YouTubeは「限定公開」でアップロードしてください。サブスク会員と購入者のみ視聴可能になります。
+                  </p>
+                </div>
+              )}
+              {form.seminar_type === "in_person" && (
+                <p className="text-sm text-gray-400">会場開催のため配信設定は不要です。</p>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Pricing */}
           <Card>

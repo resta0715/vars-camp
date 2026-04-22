@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookingButton } from "@/components/seminars/booking-button";
+import { ZoomJoinButton } from "@/components/seminars/zoom-join-button";
+import { VideoPlayer } from "@/components/seminars/video-player";
 
 const typeLabels: Record<string, { label: string; variant: "realtime" | "ondemand" | "inperson" }> = {
   realtime: { label: "ライブ研修", variant: "realtime" },
@@ -102,7 +104,14 @@ export default async function SeminarDetailPage({
             スケジュールに戻る
           </Link>
 
-          <div className="grid gap-8 lg:grid-cols-3">
+          {/* Video Player for on-demand */}
+          <VideoPlayer
+            recordingUrl={seminar.recording_url}
+            hasAccess={isSubscriber || !!userBooking || seminar.price === 0}
+            seminarType={seminar.seminar_type}
+          />
+
+          <div className="grid gap-8 lg:grid-cols-3 mt-6">
             {/* Main Content */}
             <div className="lg:col-span-2">
               <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -248,6 +257,17 @@ export default async function SeminarDetailPage({
                       この研修は満席です
                     </p>
                   )}
+
+                  {/* Zoom参加ボタン */}
+                  <div className="mt-4">
+                    <ZoomJoinButton
+                      zoomUrl={seminar.zoom_url}
+                      scheduledAt={seminar.scheduled_at}
+                      isBooked={!!userBooking}
+                      isSubscriber={isSubscriber}
+                      seminarType={seminar.seminar_type}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </div>
