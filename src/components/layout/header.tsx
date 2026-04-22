@@ -7,11 +7,14 @@ import { Menu, X, Calendar, BookOpen, LogIn, LogOut, Shield, GraduationCap, User
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
+const DEV_EMAILS = ["mdit2416@gmail.com"];
+
 interface HeaderProps {
-  user?: { full_name: string; avatar_url: string; role: string } | null;
+  user?: { full_name: string; avatar_url: string; role: string; email?: string } | null;
 }
 
 export function Header({ user }: HeaderProps) {
+  const isDevUser = user ? DEV_EMAILS.includes(user.email || "") : false;
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
 
@@ -52,7 +55,7 @@ export function Header({ user }: HeaderProps) {
           </Link>
           {user ? (
             <div className="flex items-center gap-2">
-              {user.role === "admin" && (
+              {(user.role === "admin" || isDevUser) && (
                 <Link href="/admin">
                   <Button variant="outline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50">
                     <Shield className="mr-1.5 h-3.5 w-3.5" />
@@ -60,7 +63,7 @@ export function Header({ user }: HeaderProps) {
                   </Button>
                 </Link>
               )}
-              {(user.role === "instructor" || user.role === "admin") && (
+              {(user.role === "instructor" || user.role === "admin" || isDevUser) && (
                 <Link href="/instructor">
                   <Button variant="outline" size="sm">
                     <GraduationCap className="mr-1.5 h-3.5 w-3.5" />
@@ -130,7 +133,7 @@ export function Header({ user }: HeaderProps) {
             </Link>
             {user ? (
               <>
-                {user.role === "admin" && (
+                {(user.role === "admin" || isDevUser) && (
                   <Link
                     href="/admin"
                     className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
@@ -139,7 +142,7 @@ export function Header({ user }: HeaderProps) {
                     管理パネル
                   </Link>
                 )}
-                {(user.role === "instructor" || user.role === "admin") && (
+                {(user.role === "instructor" || user.role === "admin" || isDevUser) && (
                   <Link
                     href="/instructor"
                     className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
