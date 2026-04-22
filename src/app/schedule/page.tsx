@@ -3,6 +3,8 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { ScheduleCalendar } from "@/components/schedule/calendar";
 
+export const revalidate = 60;
+
 export const metadata = {
   title: "研修スケジュール | vars camp",
 };

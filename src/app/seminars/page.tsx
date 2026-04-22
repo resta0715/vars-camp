@@ -8,6 +8,8 @@ import { Footer } from "@/components/layout/footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+export const revalidate = 60;
+
 export const metadata = {
   title: "研修一覧 | vars camp",
 };
