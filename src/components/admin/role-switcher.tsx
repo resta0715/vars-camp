@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Shield, GraduationCap, CreditCard, User, RefreshCw, Loader2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { Shield, GraduationCap, CreditCard, User, RefreshCw, Loader2, CheckCircle } from "lucide-react";
 
 const roles = [
   { value: "admin", label: "Vars管理者", icon: Shield, color: "bg-red-100 text-red-700 border-red-200" },
@@ -19,36 +18,35 @@ interface RoleSwitcherProps {
 export function RoleSwitcher({ currentRole, userId }: RoleSwitcherProps) {
   const [activeRole, setActiveRole] = useState(currentRole);
   const [switching, setSwitching] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const switchRole = async (newRole: string) => {
-    if (newRole === activeRole) return;
+    if (newRole === activeRole || switching) return;
     setSwitching(newRole);
-    setError(null);
+    setMessage(null);
 
     try {
-      const supabase = createClient();
+      const res = await fetch("/api/dev/switch-role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: newRole }),
+      });
 
-      const { data, error: updateError } = await supabase
-        .from("profiles")
-        .update({ role: newRole })
-        .eq("id", userId)
-        .select("role")
-        .single();
+      const data = await res.json();
 
-      if (updateError) {
-        setError(updateError.message);
+      if (!res.ok) {
+        setMessage({ type: "error", text: data.error || "切り替え失敗" });
         setSwitching(null);
         return;
       }
 
-      setActiveRole(data.role);
+      setActiveRole(newRole);
+      setMessage({ type: "success", text: `${roles.find(r => r.value === newRole)?.label}に切り替えました` });
       setSwitching(null);
 
-      // ページ全体をリロードしてサーバーコンポーネントに反映
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 800);
     } catch (e: any) {
-      setError(e.message || "不明なエラー");
+      setMessage({ type: "error", text: e.message || "通信エラー" });
       setSwitching(null);
     }
   };
@@ -59,9 +57,12 @@ export function RoleSwitcher({ currentRole, userId }: RoleSwitcherProps) {
         <RefreshCw className="h-3.5 w-3.5" />
         開発用：権限切り替え
       </p>
-      {error && (
-        <div className="mb-3 rounded-lg bg-red-100 px-3 py-2 text-xs text-red-700">
-          エラー: {error}
+      {message && (
+        <div className={`mb-3 rounded-lg px-3 py-2 text-xs ${
+          message.type === "error" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
+        }`}>
+          {message.type === "success" && <CheckCircle className="inline h-3.5 w-3.5 mr-1" />}
+          {message.text}
         </div>
       )}
       <div className="grid grid-cols-2 gap-2">
@@ -89,15 +90,12 @@ export function RoleSwitcher({ currentRole, userId }: RoleSwitcherProps) {
               )}
               <div className="text-left">
                 <span className="block">{role.label}</span>
-                {isActive && <span className="text-[10px] opacity-70">現在の権限</span>}
+                {isActive && <span className="text-[10px] opacity-70">現在</span>}
               </div>
             </button>
           );
         })}
       </div>
-      <p className="mt-2 text-[10px] text-orange-400">
-        ※ ボタンを押すと権限が変わり、ページが自動リロードされます
-      </p>
     </div>
   );
 }
