@@ -105,9 +105,6 @@ export default async function LandingPage() {
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
         <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <Badge variant="secondary" className="mb-6 bg-white/20 text-white border-white/30">
-              美容室製品卸 vars が運営
-            </Badge>
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
               美容室の経営を、
               <br />
