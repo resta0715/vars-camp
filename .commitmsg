@@ -1,1 +1,1 @@
-Fix: useSearchParams を Suspense boundary で囲む
+Fix: スケジュールボタンのテキストが見えない問題を修正
