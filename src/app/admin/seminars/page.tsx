@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { CheckCircle, XCircle, Eye, Search, Calendar } from "lucide-react";
+import Link from "next/link";
+import { CheckCircle, XCircle, Eye, Search, Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -78,7 +79,15 @@ export default function AdminSeminarsPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">研修管理</h1>
-        <Badge variant="secondary">{seminars.length}件</Badge>
+        <div className="flex items-center gap-3">
+          <Badge variant="secondary">{seminars.length}件</Badge>
+          <Link href="/admin/seminars/new">
+            <Button size="sm">
+              <Plus className="mr-1.5 h-4 w-4" />
+              研修を追加
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="mb-6">

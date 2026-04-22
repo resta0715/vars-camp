@@ -1,11 +1,19 @@
 import { createClient } from "@/lib/supabase/server";
 import { Users, GraduationCap, Calendar, CreditCard, TrendingUp, UserPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RoleSwitcher } from "@/components/admin/role-switcher";
 
 export const metadata = { title: "管理者ダッシュボード | vars camp" };
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, role")
+    .eq("id", user?.id || "")
+    .single();
 
   const { count: totalMembers } = await supabase
     .from("profiles")
@@ -85,6 +93,13 @@ export default async function AdminDashboard() {
           </Card>
         ))}
       </div>
+
+      {/* Dev Role Switcher */}
+      {profile && (
+        <div className="mb-8">
+          <RoleSwitcher currentRole={profile.role} userId={profile.id} />
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Recent Members */}
