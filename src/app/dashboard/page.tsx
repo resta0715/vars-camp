@@ -12,6 +12,9 @@ import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { RoleSwitcher } from "@/components/admin/role-switcher";
+
+const DEV_EMAILS = ["mdit2416@gmail.com"];
 
 export const metadata = {
   title: "マイページ | vars camp",
@@ -85,11 +88,18 @@ export default async function DashboardPage() {
     .limit(3);
 
   const isSubscriber = profile.role === "subscriber" || !!subscription;
+  const isDevUser = DEV_EMAILS.includes(profile.email || "");
   const greeting = new Date().getHours() < 12 ? "おはようございます" : new Date().getHours() < 18 ? "こんにちは" : "こんばんは";
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header user={profile} />
+
+      {isDevUser && (
+        <div className="mx-auto w-full max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+          <RoleSwitcher currentRole={profile.role} userId={profile.id} />
+        </div>
+      )}
 
       <main className="flex-1 bg-gray-50">
         {/* Hero Banner */}
