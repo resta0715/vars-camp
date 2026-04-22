@@ -22,30 +22,23 @@ export default async function SeminarsPage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  let profile = null;
-  if (user) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("full_name, avatar_url, role, email")
-      .eq("id", user.id)
-      .single();
-    profile = data;
-  }
 
-  const { data: seminars } = await supabase
-    .from("seminars")
-    .select(`
-      *,
-      instructor:profiles!seminars_instructor_id_fkey(full_name, avatar_url),
-      category:categories!seminars_category_id_fkey(name, color)
-    `)
-    .eq("is_published", true)
-    .order("scheduled_at", { ascending: true });
-
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("*")
-    .order("sort_order");
+  const [profileResult, { data: seminars }, { data: categories }] = await Promise.all([
+    user
+      ? supabase.from("profiles").select("full_name, avatar_url, role, email").eq("id", user.id).single()
+      : Promise.resolve({ data: null }),
+    supabase
+      .from("seminars")
+      .select(`
+        *,
+        instructor:profiles!seminars_instructor_id_fkey(full_name, avatar_url),
+        category:categories!seminars_category_id_fkey(name, color)
+      `)
+      .eq("is_published", true)
+      .order("scheduled_at", { ascending: true }),
+    supabase.from("categories").select("*").order("sort_order"),
+  ]);
+  const profile = profileResult?.data || null;
 
   const upcomingSeminars = (seminars || []).filter(
     (s) => s.seminar_type !== "ondemand" && s.scheduled_at && new Date(s.scheduled_at) > new Date()

@@ -12,31 +12,23 @@ export default async function SchedulePage() {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  let profile = null;
-  if (user) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("full_name, avatar_url, role, email")
-      .eq("id", user.id)
-      .single();
-    profile = data;
-  }
-
-  const { data: seminars } = await supabase
-    .from("seminars")
-    .select(`
-      *,
-      instructor:profiles!seminars_instructor_id_fkey(id, full_name, avatar_url),
-      category:categories!seminars_category_id_fkey(id, name, slug, color, icon)
-    `)
-    .eq("is_published", true)
-    .gte("scheduled_at", new Date().toISOString())
-    .order("scheduled_at", { ascending: true });
-
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("*")
-    .order("sort_order");
+  const [profileResult, { data: seminars }, { data: categories }] = await Promise.all([
+    user
+      ? supabase.from("profiles").select("full_name, avatar_url, role, email").eq("id", user.id).single()
+      : Promise.resolve({ data: null }),
+    supabase
+      .from("seminars")
+      .select(`
+        *,
+        instructor:profiles!seminars_instructor_id_fkey(id, full_name, avatar_url),
+        category:categories!seminars_category_id_fkey(id, name, slug, color, icon)
+      `)
+      .eq("is_published", true)
+      .gte("scheduled_at", new Date().toISOString())
+      .order("scheduled_at", { ascending: true }),
+    supabase.from("categories").select("*").order("sort_order"),
+  ]);
+  const profile = profileResult?.data || null;
 
   return (
     <div className="flex min-h-screen flex-col">

@@ -15,34 +15,29 @@ export default async function AdminDashboard() {
     .eq("id", user?.id || "")
     .single();
 
-  const { count: totalMembers } = await supabase
-    .from("profiles")
-    .select("*", { count: "exact", head: true });
-
-  const { count: subscribers } = await supabase
-    .from("profiles")
-    .select("*", { count: "exact", head: true })
-    .eq("role", "subscriber");
-
-  const { count: instructors } = await supabase
-    .from("profiles")
-    .select("*", { count: "exact", head: true })
-    .eq("role", "instructor");
-
-  const { count: totalSeminars } = await supabase
-    .from("seminars")
-    .select("*", { count: "exact", head: true });
-
-  const { count: pendingSeminars } = await supabase
-    .from("seminars")
-    .select("*", { count: "exact", head: true })
-    .eq("is_published", true)
-    .eq("is_approved", false);
-
-  const { count: totalBookings } = await supabase
-    .from("bookings")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "confirmed");
+  const [
+    { count: totalMembers },
+    { count: subscribers },
+    { count: instructors },
+    { count: totalSeminars },
+    { count: pendingSeminars },
+    { count: totalBookings },
+    { data: recentMembers },
+    { data: upcomingSeminars },
+  ] = await Promise.all([
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
+    supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "subscriber"),
+    supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "instructor"),
+    supabase.from("seminars").select("*", { count: "exact", head: true }),
+    supabase.from("seminars").select("*", { count: "exact", head: true }).eq("is_published", true).eq("is_approved", false),
+    supabase.from("bookings").select("*", { count: "exact", head: true }).eq("status", "confirmed"),
+    supabase.from("profiles").select("id, full_name, email, role, salon_name, created_at").order("created_at", { ascending: false }).limit(5),
+    supabase.from("seminars").select(`
+      id, title, scheduled_at, seminar_type, is_approved,
+      instructor:profiles!seminars_instructor_id_fkey(full_name),
+      category:categories!seminars_category_id_fkey(name, color)
+    `).eq("is_published", true).gte("scheduled_at", new Date().toISOString()).order("scheduled_at", { ascending: true }).limit(5),
+  ]);
 
   const stats = [
     { label: "総会員数", value: totalMembers || 0, icon: Users, color: "bg-blue-100 text-blue-600" },
@@ -52,26 +47,6 @@ export default async function AdminDashboard() {
     { label: "承認待ち", value: pendingSeminars || 0, icon: TrendingUp, color: "bg-red-100 text-red-600" },
     { label: "予約数", value: totalBookings || 0, icon: UserPlus, color: "bg-cyan-100 text-cyan-600" },
   ];
-
-  // 最新の会員
-  const { data: recentMembers } = await supabase
-    .from("profiles")
-    .select("id, full_name, email, role, salon_name, created_at")
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  // 今後の研修
-  const { data: upcomingSeminars } = await supabase
-    .from("seminars")
-    .select(`
-      id, title, scheduled_at, seminar_type, is_approved,
-      instructor:profiles!seminars_instructor_id_fkey(full_name),
-      category:categories!seminars_category_id_fkey(name, color)
-    `)
-    .eq("is_published", true)
-    .gte("scheduled_at", new Date().toISOString())
-    .order("scheduled_at", { ascending: true })
-    .limit(5);
 
   return (
     <div>

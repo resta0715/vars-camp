@@ -40,52 +40,54 @@ export default async function DashboardPage() {
 
   if (!profile) redirect("/auth/login");
 
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .single();
-
-  const { data: upcomingBookings } = await supabase
-    .from("bookings")
-    .select(`
-      *,
-      seminar:seminars!bookings_seminar_id_fkey(
+  const [
+    { data: subscription },
+    { data: upcomingBookings },
+    { data: recommendedSeminars },
+    { data: ondemandSeminars },
+  ] = await Promise.all([
+    supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .single(),
+    supabase
+      .from("bookings")
+      .select(`
+        *,
+        seminar:seminars!bookings_seminar_id_fkey(
+          *,
+          instructor:profiles!seminars_instructor_id_fkey(full_name, avatar_url),
+          category:categories!seminars_category_id_fkey(name, color)
+        )
+      `)
+      .eq("user_id", user.id)
+      .eq("status", "confirmed")
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("seminars")
+      .select(`
         *,
         instructor:profiles!seminars_instructor_id_fkey(full_name, avatar_url),
         category:categories!seminars_category_id_fkey(name, color)
-      )
-    `)
-    .eq("user_id", user.id)
-    .eq("status", "confirmed")
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  // おすすめ研修（今後のライブ研修）
-  const { data: recommendedSeminars } = await supabase
-    .from("seminars")
-    .select(`
-      *,
-      instructor:profiles!seminars_instructor_id_fkey(full_name, avatar_url),
-      category:categories!seminars_category_id_fkey(name, color)
-    `)
-    .eq("is_published", true)
-    .eq("is_approved", true)
-    .gte("scheduled_at", new Date().toISOString())
-    .order("scheduled_at", { ascending: true })
-    .limit(4);
-
-  // オンデマンド
-  const { data: ondemandSeminars } = await supabase
-    .from("seminars")
-    .select(`
-      *,
-      category:categories!seminars_category_id_fkey(name, color)
-    `)
-    .eq("is_published", true)
-    .eq("seminar_type", "ondemand")
-    .limit(3);
+      `)
+      .eq("is_published", true)
+      .eq("is_approved", true)
+      .gte("scheduled_at", new Date().toISOString())
+      .order("scheduled_at", { ascending: true })
+      .limit(4),
+    supabase
+      .from("seminars")
+      .select(`
+        *,
+        category:categories!seminars_category_id_fkey(name, color)
+      `)
+      .eq("is_published", true)
+      .eq("seminar_type", "ondemand")
+      .limit(3),
+  ]);
 
   const isSubscriber = profile.role === "subscriber" || !!subscription;
   const isDevUser = DEV_EMAILS.includes(profile.email || "");
