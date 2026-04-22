@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Shield, GraduationCap, CreditCard, User, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Shield, GraduationCap, CreditCard, User, RefreshCw, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const roles = [
@@ -19,27 +17,40 @@ interface RoleSwitcherProps {
 }
 
 export function RoleSwitcher({ currentRole, userId }: RoleSwitcherProps) {
-  const router = useRouter();
+  const [activeRole, setActiveRole] = useState(currentRole);
   const [switching, setSwitching] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const switchRole = async (newRole: string) => {
-    if (newRole === currentRole) return;
+    if (newRole === activeRole) return;
     setSwitching(newRole);
+    setError(null);
 
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("profiles")
-      .update({ role: newRole })
-      .eq("id", userId);
+    try {
+      const supabase = createClient();
 
-    if (error) {
-      alert("切り替え失敗: " + error.message);
+      const { data, error: updateError } = await supabase
+        .from("profiles")
+        .update({ role: newRole })
+        .eq("id", userId)
+        .select("role")
+        .single();
+
+      if (updateError) {
+        setError(updateError.message);
+        setSwitching(null);
+        return;
+      }
+
+      setActiveRole(data.role);
       setSwitching(null);
-      return;
-    }
 
-    router.refresh();
-    setSwitching(null);
+      // ページ全体をリロードしてサーバーコンポーネントに反映
+      window.location.reload();
+    } catch (e: any) {
+      setError(e.message || "不明なエラー");
+      setSwitching(null);
+    }
   };
 
   return (
@@ -48,9 +59,15 @@ export function RoleSwitcher({ currentRole, userId }: RoleSwitcherProps) {
         <RefreshCw className="h-3.5 w-3.5" />
         開発用：権限切り替え
       </p>
+      {error && (
+        <div className="mb-3 rounded-lg bg-red-100 px-3 py-2 text-xs text-red-700">
+          エラー: {error}
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-2">
         {roles.map((role) => {
-          const isActive = currentRole === role.value;
+          const isActive = activeRole === role.value;
+          const isLoading = switching === role.value;
           return (
             <button
               key={role.value}
@@ -61,10 +78,15 @@ export function RoleSwitcher({ currentRole, userId }: RoleSwitcherProps) {
                   ? `${role.color} ring-2 ring-offset-1 ring-orange-400`
                   : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
                 }
-                ${switching === role.value ? "opacity-50" : ""}
+                ${isLoading ? "opacity-50" : ""}
+                ${switching !== null && !isLoading ? "cursor-not-allowed opacity-40" : ""}
               `}
             >
-              <role.icon className="h-4 w-4" />
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <role.icon className="h-4 w-4" />
+              )}
               <div className="text-left">
                 <span className="block">{role.label}</span>
                 {isActive && <span className="text-[10px] opacity-70">現在の権限</span>}
@@ -74,7 +96,7 @@ export function RoleSwitcher({ currentRole, userId }: RoleSwitcherProps) {
         })}
       </div>
       <p className="mt-2 text-[10px] text-orange-400">
-        ※ 切り替え後、ページをリロードすると反映されます
+        ※ ボタンを押すと権限が変わり、ページが自動リロードされます
       </p>
     </div>
   );
