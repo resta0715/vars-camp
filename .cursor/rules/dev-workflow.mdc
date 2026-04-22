@@ -1,0 +1,36 @@
+# 開発ワークフロー
+
+## デフォルト: ローカル開発モード
+1. ローカルで編集 → コードの変更・新規作成
+2. 確認 → ユーザーに変更内容を説明、承認を得る
+3. git commit & push → ユーザーの「OK」後に実行
+4. Vercel に自動デプロイ
+
+コードを変更したら、最後に必ず「コミット＆pushしますか？」と聞くこと。
+
+## デプロイ先
+- リポジトリ: https://github.com/resta0715/vars-camp
+- Vercel: https://vars-camp.vercel.app
+- ブランチ: main (pushすると自動デプロイ)
+
+## 安全ガード
+### 実行前に必ずユーザーに確認を取る操作
+- Supabase / DB への INSERT, UPDATE, DELETE を含むコード・スクリプトの実行
+- LINE API への送信
+- 外部 API への POST / PUT / DELETE リクエスト
+- git push, git reset --hard などの破壊的 Git 操作
+- rm -rf やファイル一括削除
+- pip install / npm install などのパッケージインストール
+
+### 確認不要（そのまま実行してよい操作）
+- ファイルの読み取り・検索・編集
+- git status, git diff, git log, git add, git commit
+- SELECT クエリ（読み取りのみ）
+- lint チェック、テスト実行
+
+## git commit の注意
+- この環境では `git commit -m` が `--trailer` エラーになる場合がある
+- 対策: `/usr/bin/git -c commit.gpgsign=false commit -m "message"` または `-F` オプションを使う
+
+## 言語
+- ユーザーへの応答は必ず日本語で行う

@@ -1,0 +1,76 @@
+# vars camp プロジェクト概要
+
+## ビジネス概要
+美容室製品卸「vars」が運営する、美容室向けZoom研修プラットフォーム。
+サブスク会員は見放題、無料会員は単発課金。ライブ(Zoom)・オンデマンド・会場開催の3形式。
+
+## 技術スタック
+- Next.js 14 (App Router) + TypeScript
+- Supabase (認証 + PostgreSQL + RLS)
+- Tailwind CSS + shadcn/ui
+- デプロイ: Vercel (自動デプロイ)
+- 決済: Stripe (未実装)
+
+## リポジトリ・デプロイ
+- GitHub: https://github.com/resta0715/vars-camp.git
+- ブランチ: main
+- 本番URL: https://vars-camp.vercel.app
+
+## Supabase
+- DB パスワード: DFoG8hrDuSfHDD2g
+- 認証: Google OAuth 設定済み、LINE ログイン未実装
+- anon key: Vercel環境変数にレガシーJWT形式で設定済み (sb_publishable_ 形式は非対応)
+- テーブル: profiles, seminars, categories, bookings, subscriptions, view_history, instructor_availability, notifications
+
+## 開発用アカウント
+- メール: mdit2416@gmail.com
+- DEV_EMAILS に登録 → どの権限でも admin パネルにアクセス可能
+- 権限切替: /admin ダッシュボード上部 or API /api/dev/switch-role
+
+## 実装済み機能
+- LP (ランディングページ)
+- Google ログイン (OAuth)
+- 研修スケジュール (カレンダー表示)
+- 研修一覧・詳細ページ
+- Zoom参加ボタン (時間制限付き・予約者/サブスク会員のみ)
+- オンデマンド動画プレーヤー (YouTube/Vimeo/MP4対応)
+- ユーザーダッシュボード
+- 講師パネル (研修作成)
+- admin管理画面 (会員管理, 講師管理, 研修管理, カテゴリ管理)
+- admin画面から研修・オンデマンド追加
+- 開発用: 権限クイック切り替え
+- 各ページ loading skeleton
+
+## 未実装・次のタスク
+1. Stripe 決済 (サブスク月額 + 単発購入) → Stripeアカウント作成が必要
+2. 仕入れ一括請求 (admin画面で手動管理)
+3. LINE 公式アカウント連携 (Messaging API でリマインド通知)
+4. LINE ログイン (Supabase Custom OIDC)
+5. 講師のスケジュール空き設定
+6. PayPay 決済 (後回し)
+
+## ファイル構成
+```
+src/
+├── app/
+│   ├── page.tsx              # LP
+│   ├── dashboard/page.tsx    # ユーザーダッシュボード
+│   ├── schedule/page.tsx     # スケジュール
+│   ├── seminars/             # 研修一覧・詳細
+│   ├── instructor/           # 講師パネル
+│   ├── admin/                # 管理画面 (ダッシュボード, 会員, 研修, 講師, カテゴリ)
+│   ├── auth/                 # ログイン
+│   └── api/
+│       ├── auth/callback/    # OAuth コールバック
+│       └── dev/switch-role/  # 権限切替API
+├── components/
+│   ├── layout/               # Header, Footer
+│   ├── admin/                # RoleSwitcher
+│   ├── seminars/             # BookingButton, ZoomJoinButton, VideoPlayer
+│   ├── schedule/             # Calendar
+│   └── ui/                   # shadcn/ui コンポーネント
+├── lib/supabase/             # client.ts, server.ts, middleware.ts
+└── types/database.ts         # 型定義
+supabase/migrations/
+└── 001_initial_schema.sql    # DBスキーマ + RLS + 初期データ
+```
