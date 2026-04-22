@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RoleSwitcher } from "@/components/admin/role-switcher";
 
-const DEV_EMAILS = ["mdit2416@gmail.com"];
+const DEV_EMAILS = ["mdit2416@gmail.com", "test@vars-camp.dev"];
 
 export const metadata = {
   title: "マイページ | vars camp",

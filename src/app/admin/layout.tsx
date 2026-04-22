@@ -35,7 +35,7 @@ export default async function AdminLayout({
     .eq("id", user.id)
     .single();
 
-  const DEV_EMAILS = ["mdit2416@gmail.com"];
+  const DEV_EMAILS = ["mdit2416@gmail.com", "test@vars-camp.dev"];
   const isDevUser = DEV_EMAILS.includes(user.email || "");
   if (profile?.role !== "admin" && !isDevUser) redirect("/dashboard");
 

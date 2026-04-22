@@ -7,7 +7,7 @@ import { Menu, X, Calendar, BookOpen, LogIn, LogOut, Shield, GraduationCap, User
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
-const DEV_EMAILS = ["mdit2416@gmail.com"];
+const DEV_EMAILS = ["mdit2416@gmail.com", "test@vars-camp.dev"];
 
 interface HeaderProps {
   user?: { full_name: string; avatar_url: string; role: string; email?: string } | null;
