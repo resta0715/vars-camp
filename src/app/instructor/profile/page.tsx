@@ -21,17 +21,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 
-const INDUSTRY_PRESETS = [
-  "美容室",
-  "理容室",
-  "ネイル",
-  "アイラッシュ",
-  "エステ",
-  "まつげエクステ",
-  "ヘアメイク",
-  "脱毛",
-];
-
 export default function InstructorProfilePage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -313,22 +302,6 @@ export default function InstructorProfilePage() {
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
-              </div>
-
-              <div>
-                <p className="mb-1.5 text-xs text-gray-400">よく使う業種</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {INDUSTRY_PRESETS.filter((p) => !industries.includes(p)).map((p) => (
-                    <button
-                      key={p}
-                      type="button"
-                      onClick={() => addIndustry(p)}
-                      className="rounded-full border border-gray-200 px-3 py-1 text-xs text-gray-600 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 transition-colors"
-                    >
-                      + {p}
-                    </button>
-                  ))}
-                </div>
               </div>
             </CardContent>
           </Card>
