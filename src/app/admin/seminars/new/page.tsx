@@ -3,12 +3,20 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save, Video, MapPin, Play } from "lucide-react";
+import { ArrowLeft, Save, Video, MapPin, Play, AlertTriangle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
-import type { Category, Profile } from "@/types/database";
+import {
+  findConflict,
+  isWithinAvailability,
+  describeAvailability,
+  PG_EXCLUSION_VIOLATION,
+  type ScheduledSeminarLite,
+} from "@/lib/scheduling";
+import type { Category, Profile, InstructorAvailability } from "@/types/database";
 
 const seminarTypes = [
   { value: "realtime", label: "ライブ研修", description: "Zoomでリアルタイム", icon: Video },
@@ -20,7 +28,10 @@ export default function AdminNewSeminarPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [instructors, setInstructors] = useState<Profile[]>([]);
+  const [slots, setSlots] = useState<InstructorAvailability[]>([]);
+  const [instructorSeminars, setInstructorSeminars] = useState<ScheduledSeminarLite[]>([]);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     instructor_id: "",
     title: "",
@@ -47,15 +58,53 @@ export default function AdminNewSeminarPage() {
     });
   }, []);
 
+  useEffect(() => {
+    if (!form.instructor_id) {
+      setSlots([]);
+      setInstructorSeminars([]);
+      return;
+    }
+    const supabase = createClient();
+    (async () => {
+      const [{ data: availability }, { data: seminars }] = await Promise.all([
+        supabase.from("instructor_availability").select("*").eq("instructor_id", form.instructor_id),
+        supabase
+          .from("seminars")
+          .select("id, title, scheduled_at, duration_minutes")
+          .eq("instructor_id", form.instructor_id)
+          .not("scheduled_at", "is", null),
+      ]);
+      setSlots((availability as InstructorAvailability[]) || []);
+      setInstructorSeminars((seminars as ScheduledSeminarLite[]) || []);
+    })();
+  }, [form.instructor_id]);
+
   const handleSubmit = async (publish: boolean) => {
+    setError(null);
     if (!form.title || !form.instructor_id) {
       alert("タイトルと講師は必須です");
       return;
     }
+
+    if (form.seminar_type !== "ondemand" && form.scheduled_at) {
+      if (!isWithinAvailability(form.scheduled_at, form.duration_minutes, slots)) {
+        setError("選択した日時は、この講師の公開枠の範囲外です。公開枠内で設定してください。");
+        return;
+      }
+      const conflict = findConflict(form.scheduled_at, form.duration_minutes, instructorSeminars);
+      if (conflict) {
+        const when = conflict.scheduled_at
+          ? new Date(conflict.scheduled_at).toLocaleString("ja-JP")
+          : "";
+        setError(`この時間帯は、この講師の既存研修「${conflict.title}」（${when}）と重複しています。`);
+        return;
+      }
+    }
+
     setSaving(true);
 
     const supabase = createClient();
-    const { error } = await supabase.from("seminars").insert({
+    const { error: insertError } = await supabase.from("seminars").insert({
       instructor_id: form.instructor_id,
       title: form.title,
       description: form.description,
@@ -73,8 +122,12 @@ export default function AdminNewSeminarPage() {
       is_approved: true,
     });
 
-    if (error) {
-      alert("保存に失敗しました: " + error.message);
+    if (insertError) {
+      if (insertError.code === PG_EXCLUSION_VIOLATION) {
+        setError("この時間帯は他の研修と重複しているため保存できません。日時を変更してください。");
+      } else {
+        setError("保存に失敗しました: " + insertError.message);
+      }
       setSaving(false);
       return;
     }
@@ -194,6 +247,21 @@ export default function AdminNewSeminarPage() {
                   <Input type="number" min={15} step={15} value={form.duration_minutes} onChange={(e) => update("duration_minutes", parseInt(e.target.value))} />
                 </div>
               </div>
+              {slots.length > 0 && (
+                <div className="rounded-lg border border-brand-100 bg-brand-50 p-3">
+                  <p className="flex items-center gap-1.5 text-xs font-semibold text-brand-700">
+                    <Clock className="h-3.5 w-3.5" />
+                    この講師の公開枠（この範囲内で設定してください）
+                  </p>
+                  <ul className="mt-2 flex flex-wrap gap-1.5">
+                    {describeAvailability(slots).map((label, i) => (
+                      <li key={i}>
+                        <Badge variant="secondary">{label}</Badge>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               {form.seminar_type === "in_person" && (
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
@@ -247,6 +315,13 @@ export default function AdminNewSeminarPage() {
             </div>
           </CardContent>
         </Card>
+
+        {error && (
+          <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex gap-3 justify-end pt-2 pb-8">
