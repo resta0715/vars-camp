@@ -2,7 +2,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Calendar, Clock, Video, MapPin, Play, Users, Search } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,14 +21,9 @@ const typeLabels: Record<string, { label: string; variant: "realtime" | "ondeman
 };
 
 export default async function SeminarsPage() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  const [profileResult, { data: seminars }, { data: categories }] = await Promise.all([
-    user
-      ? supabase.from("profiles").select("full_name, avatar_url, role, email").eq("id", user.id).single()
-      : Promise.resolve({ data: null }),
+  const [{ data: seminars }, { data: categories }] = await Promise.all([
     supabase
       .from("seminars")
       .select(`
@@ -40,7 +35,6 @@ export default async function SeminarsPage() {
       .order("scheduled_at", { ascending: true }),
     supabase.from("categories").select("*").order("sort_order"),
   ]);
-  const profile = profileResult?.data || null;
 
   const upcomingSeminars = (seminars || []).filter(
     (s) => s.seminar_type !== "ondemand" && s.scheduled_at && new Date(s.scheduled_at) > new Date()
@@ -51,7 +45,7 @@ export default async function SeminarsPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header user={profile} />
+      <Header />
 
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

@@ -41,6 +41,11 @@ export function Footer() {
                   料金プラン
                 </Link>
               </li>
+              <li>
+                <Link href="/for-instructors" className="text-sm text-gray-500 hover:text-brand-600">
+                  講師募集
+                </Link>
+              </li>
             </ul>
           </div>
 

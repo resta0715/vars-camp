@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Menu, X, Calendar, BookOpen, LogIn, LogOut, Shield, GraduationCap, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,14 +9,42 @@ import { createClient } from "@/lib/supabase/client";
 
 const DEV_EMAILS = ["mdit2416@gmail.com", "test@vars-camp.dev"];
 
+type HeaderUser = { full_name: string; avatar_url: string; role: string; email?: string };
+
 interface HeaderProps {
-  user?: { full_name: string; avatar_url: string; role: string; email?: string } | null;
+  // 明示的に渡された場合（null 含む）はそれを優先。
+  // 未指定（undefined）の場合は静的ページとみなし、クライアント側でログイン状態を取得する。
+  user?: HeaderUser | null;
 }
 
-export function Header({ user }: HeaderProps) {
+export function Header({ user: userProp }: HeaderProps) {
+  const selfFetch = userProp === undefined;
+  const [fetchedUser, setFetchedUser] = useState<HeaderUser | null>(null);
+  const user = selfFetch ? fetchedUser : userProp;
   const isDevUser = user ? DEV_EMAILS.includes(user.email || "") : false;
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (!selfFetch) return;
+    let active = true;
+    const supabase = createClient();
+    (async () => {
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
+      if (!authUser) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, avatar_url, role, email")
+        .eq("id", authUser.id)
+        .single();
+      if (active && data) setFetchedUser(data as HeaderUser);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [selfFetch]);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -52,6 +80,12 @@ export function Header({ user }: HeaderProps) {
             className="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors"
           >
             研修一覧
+          </Link>
+          <Link
+            href="/for-instructors"
+            className="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors"
+          >
+            講師募集
           </Link>
           {user ? (
             <div className="flex items-center gap-2">
@@ -130,6 +164,13 @@ export function Header({ user }: HeaderProps) {
               onClick={() => setMobileOpen(false)}
             >
               研修一覧
+            </Link>
+            <Link
+              href="/for-instructors"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              onClick={() => setMobileOpen(false)}
+            >
+              講師募集
             </Link>
             {user ? (
               <>

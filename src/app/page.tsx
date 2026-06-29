@@ -17,7 +17,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { createClient } from "@/lib/supabase/server";
+
+// LP はログイン状態に依存しないため完全に静的化し、CDN から即時配信する。
+// ヘッダーのログイン表示はクライアント側で解決する。
+export const dynamic = "force-static";
 
 const features = [
   {
@@ -82,23 +85,10 @@ const plans = [
   },
 ];
 
-export default async function LandingPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  let profile = null;
-  if (user) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("full_name, avatar_url, role, email")
-      .eq("id", user.id)
-      .single();
-    profile = data;
-  }
-
+export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <Header user={profile} />
+      <Header />
 
       {/* Hero */}
       <section className="relative overflow-hidden gradient-hero">
