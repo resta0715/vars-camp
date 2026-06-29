@@ -55,7 +55,8 @@ export default function NewSeminarPage() {
     duration_minutes: 60,
     capacity: "",
     location: "",
-    zoom_url: "",
+    zoom_meeting_id: "",
+    zoom_passcode: "",
     recording_url: "",
     price: 0,
     tags: "",
@@ -125,7 +126,8 @@ export default function NewSeminarPage() {
       duration_minutes: form.duration_minutes,
       capacity: form.capacity ? parseInt(form.capacity) : null,
       location: form.location || null,
-      zoom_url: form.zoom_url || null,
+      zoom_meeting_id: form.zoom_meeting_id || null,
+      zoom_passcode: form.zoom_passcode || null,
       recording_url: form.recording_url || null,
       price: form.price,
       tags: form.tags ? form.tags.split(",").map((t) => t.trim()) : [],
@@ -348,24 +350,36 @@ export default function NewSeminarPage() {
             <CardHeader>
               <CardTitle className="text-base">配信・動画設定</CardTitle>
               <CardDescription>
-                ライブ研修の場合はZoom URLを、オンデマンドの場合は動画URLを設定してください。
+                ライブ研修の場合はZoomミーティングID/パスコードを、オンデマンドの場合は動画URLを設定してください。
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {form.seminar_type === "realtime" && (
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                    Zoom ミーティングURL
-                  </label>
-                  <Input
-                    value={form.zoom_url}
-                    onChange={(e) => update("zoom_url", e.target.value)}
-                    placeholder="https://zoom.us/j/..."
-                  />
-                  <p className="mt-1.5 text-xs text-gray-500">
-                    予約者に開始30分前から表示されます。後から追加も可能です。
+                <>
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                      Zoom ミーティングID
+                    </label>
+                    <Input
+                      value={form.zoom_meeting_id}
+                      onChange={(e) => update("zoom_meeting_id", e.target.value)}
+                      placeholder="123 4567 8901"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                      パスコード（任意）
+                    </label>
+                    <Input
+                      value={form.zoom_passcode}
+                      onChange={(e) => update("zoom_passcode", e.target.value)}
+                      placeholder="例: 1a2b3c"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    受講者はサイト内（vars camp ページ）で視聴します。ZoomのURLは公開されないため、URLの転送による無断視聴を防げます。
                   </p>
-                </div>
+                </>
               )}
               {form.seminar_type === "ondemand" && (
                 <div>

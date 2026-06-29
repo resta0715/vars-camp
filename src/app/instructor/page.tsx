@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Plus, Calendar, Users, BarChart3, Clock } from "lucide-react";
+import { Plus, Calendar, Users, BarChart3, Clock, UserCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
@@ -58,12 +58,20 @@ export default async function InstructorDashboard() {
               <h1 className="text-2xl font-bold text-gray-900">講師パネル</h1>
               <p className="mt-1 text-gray-500">研修の作成・管理ができます</p>
             </div>
-            <Link href="/instructor/seminars/new">
-              <Button>
-                <Plus className="mr-1.5 h-4 w-4" />
-                新しい研修を作成
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/instructor/profile">
+                <Button variant="outline">
+                  <UserCircle className="mr-1.5 h-4 w-4" />
+                  プロフィール編集
+                </Button>
+              </Link>
+              <Link href="/instructor/seminars/new">
+                <Button>
+                  <Plus className="mr-1.5 h-4 w-4" />
+                  新しい研修を作成
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* Stats */}

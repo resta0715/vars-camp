@@ -16,6 +16,14 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config) => {
+    // Zoom Meeting SDK が参照する未公開/任意モジュールを空モジュールに解決
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      "@zoom/download-manager": false,
+    };
+    return config;
+  },
 };
 
 export default nextConfig;

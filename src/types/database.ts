@@ -14,6 +14,12 @@ export interface Profile {
   phone: string | null;
   bio: string | null;
   stripe_customer_id: string | null;
+  // 講師プロフィール
+  industries: string[] | null;
+  strengths: string | null;
+  training_topics: string | null;
+  work_description: string | null;
+  is_public: boolean | null;
   created_at: string;
   updated_at: string;
 }
@@ -42,6 +48,7 @@ export interface Seminar {
   location: string | null;
   zoom_url: string | null;
   zoom_meeting_id: string | null;
+  zoom_passcode: string | null;
   recording_url: string | null;
   thumbnail_url: string | null;
   price: number;

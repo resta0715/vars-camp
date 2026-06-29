@@ -82,6 +82,12 @@ export function Header({ user: userProp }: HeaderProps) {
             研修一覧
           </Link>
           <Link
+            href="/instructors"
+            className="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors"
+          >
+            講師一覧
+          </Link>
+          <Link
             href="/for-instructors"
             className="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors"
           >
@@ -164,6 +170,13 @@ export function Header({ user: userProp }: HeaderProps) {
               onClick={() => setMobileOpen(false)}
             >
               研修一覧
+            </Link>
+            <Link
+              href="/instructors"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              onClick={() => setMobileOpen(false)}
+            >
+              講師一覧
             </Link>
             <Link
               href="/for-instructors"

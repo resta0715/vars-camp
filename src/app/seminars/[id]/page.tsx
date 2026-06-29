@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookingButton } from "@/components/seminars/booking-button";
-import { ZoomJoinButton } from "@/components/seminars/zoom-join-button";
+import { ZoomMeeting } from "@/components/seminars/zoom-meeting";
 import { VideoPlayer } from "@/components/seminars/video-player";
 
 const typeLabels: Record<string, { label: string; variant: "realtime" | "ondemand" | "inperson" }> = {
@@ -258,14 +258,18 @@ export default async function SeminarDetailPage({
                     </p>
                   )}
 
-                  {/* Zoom参加ボタン */}
+                  {/* Zoom参加（サイト内・生URL非公開） */}
                   <div className="mt-4">
-                    <ZoomJoinButton
-                      zoomUrl={seminar.zoom_url}
+                    <ZoomMeeting
+                      seminarId={seminar.id}
                       scheduledAt={seminar.scheduled_at}
+                      durationMinutes={seminar.duration_minutes}
+                      seminarType={seminar.seminar_type}
                       isBooked={!!userBooking}
                       isSubscriber={isSubscriber}
-                      seminarType={seminar.seminar_type}
+                      isFree={seminar.price === 0}
+                      canHost={!!user && (seminar.instructor_id === user.id || profile?.role === "admin")}
+                      hasMeeting={!!(seminar.zoom_meeting_id || seminar.zoom_url)}
                     />
                   </div>
                 </CardContent>

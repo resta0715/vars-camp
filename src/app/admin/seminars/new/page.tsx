@@ -42,7 +42,8 @@ export default function AdminNewSeminarPage() {
     duration_minutes: 60,
     capacity: "",
     location: "",
-    zoom_url: "",
+    zoom_meeting_id: "",
+    zoom_passcode: "",
     recording_url: "",
     price: 0,
     tags: "",
@@ -114,7 +115,8 @@ export default function AdminNewSeminarPage() {
       duration_minutes: form.duration_minutes,
       capacity: form.capacity ? parseInt(form.capacity) : null,
       location: form.location || null,
-      zoom_url: form.zoom_url || null,
+      zoom_meeting_id: form.zoom_meeting_id || null,
+      zoom_passcode: form.zoom_passcode || null,
       recording_url: form.recording_url || null,
       price: form.price,
       tags: form.tags ? form.tags.split(",").map((t) => t.trim()) : [],
@@ -285,9 +287,16 @@ export default function AdminNewSeminarPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {form.seminar_type === "realtime" && (
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">Zoom URL</label>
-                <Input value={form.zoom_url} onChange={(e) => update("zoom_url", e.target.value)} placeholder="https://zoom.us/j/..." />
+              <div className="space-y-3">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-gray-700">Zoom ミーティングID</label>
+                  <Input value={form.zoom_meeting_id} onChange={(e) => update("zoom_meeting_id", e.target.value)} placeholder="123 4567 8901" />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-gray-700">パスコード（任意）</label>
+                  <Input value={form.zoom_passcode} onChange={(e) => update("zoom_passcode", e.target.value)} placeholder="例: 1a2b3c" />
+                </div>
+                <p className="text-xs text-gray-500">受講者はサイト内で視聴します（生URL非公開）。</p>
               </div>
             )}
             {form.seminar_type === "ondemand" && (
