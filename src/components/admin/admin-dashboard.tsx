@@ -105,7 +105,7 @@ export function AdminDashboard() {
         totalBookings: totalBookings || 0,
       });
       setRecentMembers((members as MemberRow[]) || []);
-      setUpcomingSeminars((seminars as SeminarRow[]) || []);
+      setUpcomingSeminars((seminars as unknown as SeminarRow[]) || []);
       setLoading(false);
     })();
   }, []);

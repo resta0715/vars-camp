@@ -5,7 +5,6 @@ import {
   Calendar,
   CheckCircle,
   ClipboardList,
-  ExternalLink,
   Globe2,
   GraduationCap,
   ShieldCheck,
@@ -28,9 +27,8 @@ export const metadata: Metadata = {
     "美容室の経営を学ぶオンライン講座の講師を募集しています。仕組みづくりのため、アンケートへのご協力をお願いしています。",
 };
 
-/** [Vars camp 講師様アンケート](https://forms.gle/MEQKziVWvrqoDApP6) */
-const SURVEY_HREF = "https://forms.gle/MEQKziVWvrqoDApP6";
-const signupHref = "/auth/login?mode=signup";
+/** サイト内講師アンケート */
+const SURVEY_HREF = "/for-instructors/apply";
 
 const benefits = [
   {
@@ -78,8 +76,8 @@ const surveyTopics = [
 const steps = [
   {
     step: "01",
-    title: "Googleフォームでアンケートに回答",
-    body: "現在は講師の皆さまのご希望を把握し、オンラインセミナーと「繋ぐ会」の仕組みをつくる段階です。まずはフォームでのご入力をお願いしています（所要目安・数分）。",
+    title: "アンケートに回答",
+    body: "現在は講師の皆さまのご希望を把握し、オンラインセミナーと「繋ぐ会」の仕組みをつくる段階です。まずはサイト内のアンケートフォームでご入力をお願いしています（所要目安・数分）。",
   },
   {
     step: "02",
@@ -101,7 +99,7 @@ const steps = [
 const faqs = [
   {
     q: "「アンケート」と「入会登録」のどちらから始めればよいですか？",
-    a: "いま運営が案内しているのは、講師候補の方への Google フォーム（アンケート）へのご回答です。その後の流れは、フォームでのご入力内容とご希望の連絡方法に沿ってご案内します。プラットフォームの無料アカウントは、別途運営の指示に従ってお進みください。",
+    a: "まずはサイト内のアンケートフォームからご回答ください。アカウント作成は任意で、希望される方はフォーム内でメールとパスワードを設定できます。すでに Google / LINE で登録済みの方はログインしてから送信してください。",
   },
   {
     q: "報酬体系はどうなりますか？",
@@ -142,14 +140,13 @@ export default function ForInstructorsPage() {
             </h1>
             <p className="mt-6 text-lg leading-8 text-brand-100">
               美容室の経営を学ぶオンラインの場を、参加者と講師の皆さまと一緒に育てていきたいと考えています。
-              仕組みを整えるための段階でもあり、ご希望や実情を把握するために Google フォームでアンケートへのご協力をお願いしています。
+              仕組みを整えるための段階でもあり、ご希望や実情を把握するためにサイト内のアンケートへのご協力をお願いしています。
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button size="xl" className="bg-white text-brand-700 shadow-lg hover:bg-brand-50" asChild>
-                <a href={SURVEY_HREF} target="_blank" rel="noopener noreferrer">
+                <Link href={SURVEY_HREF}>
                   アンケートに回答する
-                  <ExternalLink className="ml-2 h-5 w-5" />
-                </a>
+                </Link>
               </Button>
               <Link href="#flow">
                 <Button
@@ -162,9 +159,9 @@ export default function ForInstructorsPage() {
               </Link>
             </div>
             <p className="mx-auto mt-6 max-w-xl text-center text-sm text-brand-100/85">
-              アンケートは Google アカウントでの保存が案内されています。
+              アンケート送信後、ご記入の連絡方法で運営からご連絡します。
               <br className="hidden sm:block" />
-              プラットフォーム側のご利用は、アンケート送信後・運営からのご案内とあわせて進めていただければ大丈夫です。
+              アカウント作成は任意です。希望される方はフォーム内でパスワードを設定できます。
             </p>
           </div>
         </div>
@@ -196,16 +193,7 @@ export default function ForInstructorsPage() {
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="text-2xl font-bold text-gray-900">アンケートでお伺いしていること</h2>
           <p className="mt-3 text-sm text-gray-600">
-            公開中のフォーム（
-            <a
-              href={SURVEY_HREF}
-              className="text-brand-600 underline-offset-4 hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Vars camp 講師様アンケート
-            </a>
-            ）の内容を要約しています。
+            サイト内アンケートフォームの内容を要約しています。
           </p>
           <ul className="mx-auto mt-8 max-w-xl space-y-3 text-left text-sm text-gray-700">
             {surveyTopics.map((t) => (
@@ -216,10 +204,7 @@ export default function ForInstructorsPage() {
             ))}
           </ul>
           <Button className="mt-10" size="lg" asChild>
-            <a href={SURVEY_HREF} target="_blank" rel="noopener noreferrer">
-              フォームを開いて回答する
-              <ExternalLink className="ml-2 h-4 w-4" />
-            </a>
+            <Link href={SURVEY_HREF}>アンケートフォームへ進む</Link>
           </Button>
         </div>
       </section>
@@ -259,10 +244,7 @@ export default function ForInstructorsPage() {
                 「教えること」だけでなく、現場で結果を出してきた方のリアルな言葉には、参加者の背中を押す力があります。
               </p>
               <Button className="mt-8 lg:hidden" size="lg" asChild>
-                <a href={SURVEY_HREF} target="_blank" rel="noopener noreferrer">
-                  アンケートへ進む
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </a>
+                <Link href={SURVEY_HREF}>アンケートへ進む</Link>
               </Button>
             </div>
             <ul className="space-y-4">
@@ -331,17 +313,10 @@ export default function ForInstructorsPage() {
             ご質問やご意見はフォーム内のフリーコメント欄にもご記入いただけます。内容を踏まえて運営からご連絡します。
           </p>
           <Button size="xl" className="mt-8 bg-white text-brand-700 shadow-lg hover:bg-brand-50" asChild>
-            <a href={SURVEY_HREF} target="_blank" rel="noopener noreferrer">
-              Vars camp 講師様アンケートを開く
-              <ExternalLink className="ml-2 h-5 w-5" />
-            </a>
+            <Link href={SURVEY_HREF}>Vars camp 講師様アンケートへ</Link>
           </Button>
           <p className="mx-auto mt-6 max-w-lg text-center text-sm text-brand-100/90">
-            すでに会員として vars camp をご利用の方は、アンケートとあわせて必要に応じて{" "}
-            <Link href={signupHref} className="font-medium underline underline-offset-4 hover:text-white">
-              無料アカウント作成
-            </Link>
-            もご利用いただけます（運営の指示に沿って講師権限などを進めます）。
+            すでに会員として vars camp をご利用の方は、ログインしてからアンケートを送信してください。
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-brand-100">
             <Link href="/" className="underline-offset-4 hover:underline">
