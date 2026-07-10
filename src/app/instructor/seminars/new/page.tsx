@@ -10,11 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 import {
-  findConflict,
+  findScheduleConflict,
   isWithinAvailability,
   describeAvailability,
   PG_EXCLUSION_VIOLATION,
   type ScheduledSeminarLite,
+  type ScheduledHoldLite,
 } from "@/lib/scheduling";
 import type { Category, InstructorAvailability } from "@/types/database";
 
@@ -44,6 +45,7 @@ export default function NewSeminarPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [slots, setSlots] = useState<InstructorAvailability[]>([]);
   const [mySeminars, setMySeminars] = useState<ScheduledSeminarLite[]>([]);
+  const [myHolds, setMyHolds] = useState<ScheduledHoldLite[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -75,16 +77,22 @@ export default function NewSeminarPage() {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const [{ data: availability }, { data: seminars }] = await Promise.all([
+      const [{ data: availability }, { data: seminars }, { data: holds }] = await Promise.all([
         supabase.from("instructor_availability").select("*").eq("instructor_id", user.id),
         supabase
           .from("seminars")
           .select("id, title, scheduled_at, duration_minutes")
           .eq("instructor_id", user.id)
           .not("scheduled_at", "is", null),
+        supabase
+          .from("instructor_holds")
+          .select("id, title, starts_at, duration_minutes")
+          .eq("instructor_id", user.id)
+          .eq("status", "tentative"),
       ]);
       if (availability) setSlots(availability as InstructorAvailability[]);
       if (seminars) setMySeminars(seminars as ScheduledSeminarLite[]);
+      if (holds) setMyHolds(holds as ScheduledHoldLite[]);
     })();
   }, []);
 
@@ -96,16 +104,28 @@ export default function NewSeminarPage() {
     if (form.seminar_type !== "ondemand" && form.scheduled_at) {
       if (!isWithinAvailability(form.scheduled_at, form.duration_minutes, slots)) {
         setError(
-          "選択した日時は、管理者が解放している公開枠の範囲外です。下に表示されている公開枠内で設定してください。"
+          "選択した日時は、設定した公開枠の範囲外です。スケジュール管理で公開枠を確認してください。"
         );
         return;
       }
-      const conflict = findConflict(form.scheduled_at, form.duration_minutes, mySeminars);
+      const conflict = findScheduleConflict(
+        form.scheduled_at,
+        form.duration_minutes,
+        mySeminars,
+        myHolds
+      );
       if (conflict) {
-        const when = conflict.scheduled_at
-          ? new Date(conflict.scheduled_at).toLocaleString("ja-JP")
-          : "";
-        setError(`この時間帯は既存の研修「${conflict.title}」（${when}）と重複しています。`);
+        if (conflict.type === "seminar") {
+          const when = conflict.item.scheduled_at
+            ? new Date(conflict.item.scheduled_at).toLocaleString("ja-JP")
+            : "";
+          setError(`この時間帯は既存の研修「${conflict.item.title}」（${when}）と重複しています。`);
+        } else {
+          const when = new Date(conflict.item.starts_at).toLocaleString("ja-JP");
+          setError(
+            `この時間帯は仮予約「${conflict.item.title || "（無題）"}」（${when}）と重複しています。仮予約を解除するか、別の日時を選んでください。`
+          );
+        }
         return;
       }
     }
@@ -312,6 +332,12 @@ export default function NewSeminarPage() {
                         </li>
                       ))}
                     </ul>
+                    <Link
+                      href="/instructor/availability"
+                      className="mt-2 inline-block text-xs text-brand-600 hover:underline"
+                    >
+                      公開枠・仮予約を管理する →
+                    </Link>
                   </div>
                 )}
 

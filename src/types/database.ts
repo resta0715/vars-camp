@@ -2,6 +2,7 @@ export type UserRole = "admin" | "instructor" | "subscriber" | "free";
 export type SeminarType = "realtime" | "ondemand" | "in_person";
 export type BookingStatus = "confirmed" | "cancelled" | "attended" | "no_show";
 export type SubscriptionStatus = "active" | "cancelled" | "past_due" | "trialing" | "incomplete";
+export type InstructorApplicationStatus = "pending" | "approved" | "rejected";
 
 export interface Profile {
   id: string;
@@ -20,8 +21,44 @@ export interface Profile {
   training_topics: string | null;
   work_description: string | null;
   is_public: boolean | null;
+  website_url: string | null;
+  business_type: string | null;
+  // 講師申込
+  instructor_application_status: InstructorApplicationStatus | null;
+  interest_level: string | null;
+  preferred_time_slot: string | null;
+  qa_preference: string | null;
+  delivery_preference: string | null;
+  archive_permission: string | null;
+  lecture_frequency: string | null;
+  contact_preference: string | null;
+  line_intro_ok: boolean | null;
+  application_notes: string | null;
+  applied_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface InstructorApplicationPayload {
+  full_name: string;
+  salon_name: string;
+  phone: string;
+  salon_location: string;
+  business_type: string;
+  industries: string[];
+  website_url?: string;
+  strengths?: string;
+  training_topics?: string;
+  work_description?: string;
+  interest_level: string;
+  preferred_time_slot: string;
+  qa_preference: string;
+  delivery_preference?: string;
+  archive_permission?: string;
+  lecture_frequency: string;
+  contact_preference: string;
+  line_intro_ok?: boolean;
+  application_notes?: string;
 }
 
 export interface Category {
@@ -107,6 +144,20 @@ export interface InstructorAvailability {
   is_recurring: boolean;
   specific_date: string | null;
   created_at: string;
+}
+
+export type InstructorHoldStatus = "tentative" | "released";
+
+export interface InstructorHold {
+  id: string;
+  instructor_id: string;
+  starts_at: string;
+  duration_minutes: number;
+  title: string | null;
+  note: string | null;
+  status: InstructorHoldStatus;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Notification {

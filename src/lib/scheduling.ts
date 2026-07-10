@@ -35,6 +35,17 @@ export interface ScheduledSeminarLite {
   duration_minutes: number;
 }
 
+export interface ScheduledHoldLite {
+  id: string;
+  title: string | null;
+  starts_at: string;
+  duration_minutes: number;
+}
+
+export type ScheduleConflict =
+  | { type: "seminar"; item: ScheduledSeminarLite }
+  | { type: "hold"; item: ScheduledHoldLite };
+
 // 同一講師の既存研修と時間が重複する最初の研修を返す（無ければ null）
 export function findConflict(
   scheduledAtIso: string,
@@ -54,6 +65,53 @@ export function findConflict(
     const ee = es + s.duration_minutes * 60_000;
     if (rangesOverlap(start, end, es, ee)) return s;
   }
+  return null;
+}
+
+export function findHoldConflict(
+  scheduledAtIso: string,
+  durationMinutes: number,
+  holds: ScheduledHoldLite[],
+  excludeHoldId?: string
+): ScheduledHoldLite | null {
+  const start = new Date(scheduledAtIso).getTime();
+  if (Number.isNaN(start)) return null;
+  const end = start + durationMinutes * 60_000;
+
+  for (const h of holds) {
+    if (excludeHoldId && h.id === excludeHoldId) continue;
+    const hs = new Date(h.starts_at).getTime();
+    if (Number.isNaN(hs)) continue;
+    const he = hs + h.duration_minutes * 60_000;
+    if (rangesOverlap(start, end, hs, he)) return h;
+  }
+  return null;
+}
+
+export function findScheduleConflict(
+  scheduledAtIso: string,
+  durationMinutes: number,
+  seminars: ScheduledSeminarLite[],
+  holds: ScheduledHoldLite[],
+  excludeSeminarId?: string,
+  excludeHoldId?: string
+): ScheduleConflict | null {
+  const seminarConflict = findConflict(
+    scheduledAtIso,
+    durationMinutes,
+    seminars,
+    excludeSeminarId
+  );
+  if (seminarConflict) return { type: "seminar", item: seminarConflict };
+
+  const holdConflict = findHoldConflict(
+    scheduledAtIso,
+    durationMinutes,
+    holds,
+    excludeHoldId
+  );
+  if (holdConflict) return { type: "hold", item: holdConflict };
+
   return null;
 }
 
