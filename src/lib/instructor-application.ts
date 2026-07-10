@@ -47,7 +47,6 @@ export const CONTACT_PREFERENCES = [
 
 export type InstructorApplicationFormData = {
   full_name: string;
-  salon_name: string;
   phone: string;
   salon_location: string;
   business_type: string;
@@ -69,7 +68,6 @@ export type InstructorApplicationFormData = {
 
 export const EMPTY_APPLICATION_FORM: InstructorApplicationFormData = {
   full_name: "",
-  salon_name: "",
   phone: "",
   salon_location: "",
   business_type: "",
@@ -101,7 +99,6 @@ export function validateApplicationPayload(
 ): string | null {
   const required: (keyof InstructorApplicationFormData)[] = [
     "full_name",
-    "salon_name",
     "phone",
     "salon_location",
     "business_type",

@@ -99,7 +99,7 @@ export function InstructorApplicationForm() {
 
         const profilePromise = supabase
           .from("profiles")
-          .select("full_name, salon_name, phone, salon_location")
+          .select("full_name, phone, salon_location")
           .eq("id", user.id)
           .single();
 
@@ -114,7 +114,6 @@ export function InstructorApplicationForm() {
           setForm((prev) => ({
             ...prev,
             full_name: profile.full_name || prev.full_name,
-            salon_name: profile.salon_name || prev.salon_name,
             phone: profile.phone || prev.phone,
             salon_location: profile.salon_location || prev.salon_location,
           }));
@@ -270,7 +269,7 @@ export function InstructorApplicationForm() {
       <Card>
         <CardHeader>
           <CardTitle>基本情報</CardTitle>
-          <CardDescription>お名前・サロン情報をご記入ください</CardDescription>
+          <CardDescription>お名前・連絡先をご記入ください</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
@@ -279,15 +278,6 @@ export function InstructorApplicationForm() {
               value={form.full_name}
               onChange={(e) => update("full_name", e.target.value)}
               placeholder="山田 太郎"
-              required
-            />
-          </div>
-          <div>
-            <FieldLabel required>サロン名</FieldLabel>
-            <Input
-              value={form.salon_name}
-              onChange={(e) => update("salon_name", e.target.value)}
-              placeholder="〇〇美容室"
               required
             />
           </div>

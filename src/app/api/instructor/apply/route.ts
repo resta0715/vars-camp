@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     .from("profiles")
     .update({
       full_name: body.full_name.trim(),
-      salon_name: body.salon_name.trim(),
+      salon_name: body.salon_name?.trim() || null,
       phone: body.phone.trim(),
       salon_location: body.salon_location.trim(),
       business_type: body.business_type.trim(),
