@@ -18,7 +18,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Badge } from "@/components/ui/badge";
-import { createClient } from "@/lib/supabase/server";
+
+// LP はログイン状態に依存しないため静的配信。ヘッダーのログイン表示はクライアント側で解決する。
+export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "講師募集 | vars camp",
@@ -115,25 +117,10 @@ const faqs = [
   },
 ];
 
-export default async function ForInstructorsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  let profile = null;
-  if (user) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("full_name, avatar_url, role, email")
-      .eq("id", user.id)
-      .single();
-    profile = data;
-  }
-
+export default function ForInstructorsPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <Header user={profile} />
+      <Header />
 
       {/* Hero */}
       <section className="relative overflow-hidden gradient-hero">
