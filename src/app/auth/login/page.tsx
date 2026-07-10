@@ -36,23 +36,46 @@ function TestLoginForm() {
   const [testError, setTestError] = useState<string | null>(null);
 
   const handleTestLogin = async () => {
+    if (testId !== "1234" || testPass !== "1234") {
+      setTestError("IDまたはパスワードが違います");
+      return;
+    }
+
     setTestLoading(true);
     setTestError(null);
+
+    const supabase = createClient();
+    const email = "test@vars-camp.dev";
+    const password = "testlogin1234!";
+
     try {
-      const res = await fetch("/api/auth/test-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: testId, password: testPass }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setTestError(data.error);
-        setTestLoading(false);
-        return;
+      let { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (signInError) {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: "テスト管理者" } },
+        });
+        if (signUpError) {
+          setTestError(
+            `ログインできませんでした: ${signInError.message}（新規作成: ${signUpError.message}）`
+          );
+          setTestLoading(false);
+          return;
+        }
+        ({ error: signInError } = await supabase.auth.signInWithPassword({ email, password }));
+        if (signInError) {
+          setTestError("ログイン失敗: " + signInError.message);
+          setTestLoading(false);
+          return;
+        }
       }
-      window.location.href = "/dashboard";
+
+      router.push("/dashboard");
+      router.refresh();
     } catch {
-      setTestError("通信エラー");
+      setTestError("通信エラー。Google ログインをお試しください。");
       setTestLoading(false);
     }
   };
@@ -89,6 +112,7 @@ function TestLoginForm() {
           {testLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "ログイン"}
         </Button>
       </div>
+      <p className="mt-2 text-[10px] text-orange-500/80">ID/PASS: 1234 / 1234</p>
     </div>
   );
 }
