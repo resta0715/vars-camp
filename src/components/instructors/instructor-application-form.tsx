@@ -71,27 +71,45 @@ export function InstructorApplicationForm() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [authChecking, setAuthChecking] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [accountCreated, setAccountCreated] = useState(false);
 
   useEffect(() => {
+    let active = true;
     const supabase = createClient();
+
+    const timeout = window.setTimeout(() => {
+      if (active) setAuthChecking(false);
+    }, 3000);
+
     (async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        const user = session?.user;
+        if (!active || !user) return;
+
         setLoggedIn(true);
         setUserEmail(user.email || "");
         setContactEmail(user.email || "");
-        const { data: profile } = await supabase
+
+        const profilePromise = supabase
           .from("profiles")
           .select("full_name, salon_name, phone, salon_location")
           .eq("id", user.id)
           .single();
+
+        const { data: profile } = await Promise.race([
+          profilePromise,
+          new Promise<{ data: null }>((resolve) =>
+            window.setTimeout(() => resolve({ data: null }), 2500)
+          ),
+        ]);
+
         if (profile) {
           setForm((prev) => ({
             ...prev,
@@ -101,9 +119,17 @@ export function InstructorApplicationForm() {
             salon_location: profile.salon_location || prev.salon_location,
           }));
         }
+      } catch {
+        // Supabase 未接続時もゲスト送信は可能
+      } finally {
+        if (active) setAuthChecking(false);
       }
-      setLoading(false);
     })();
+
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+    };
   }, []);
 
   const update = <K extends keyof InstructorApplicationFormData>(
@@ -198,14 +224,6 @@ export function InstructorApplicationForm() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
-      </div>
-    );
-  }
-
   if (done) {
     return (
       <Card className="mx-auto max-w-lg">
@@ -237,6 +255,12 @@ export function InstructorApplicationForm() {
 
   return (
     <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-8">
+      {authChecking && (
+        <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-500">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          ログイン状態を確認中...
+        </div>
+      )}
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
