@@ -305,7 +305,6 @@ export function InstructorApplicationForm() {
             <Input
               value={form.business_type}
               onChange={(e) => update("business_type", e.target.value)}
-              placeholder="美容室 / ネイルサロン など"
               required
             />
           </div>
