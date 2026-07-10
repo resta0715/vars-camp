@@ -1,7 +1,21 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+/** `/instructor` 配下のみ保護。`/instructors`（講師一覧）は公開ページ。 */
+function isProtectedPath(pathname: string): boolean {
+  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) return true;
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) return true;
+  if (pathname === "/instructor" || pathname.startsWith("/instructor/")) return true;
+  return false;
+}
+
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  if (!isProtectedPath(pathname)) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -24,15 +38,6 @@ export async function updateSession(request: NextRequest) {
       },
     }
   );
-
-  const protectedPaths = ["/dashboard", "/instructor", "/admin"];
-  const isProtected = protectedPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  );
-
-  if (!isProtected) {
-    return supabaseResponse;
-  }
 
   const {
     data: { user },
