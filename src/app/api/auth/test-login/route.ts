@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 
 const TEST_ID = "1234";
 const TEST_PASS = "1234";
-const TEST_EMAIL = "test@vars-camp.dev";
+const TEST_EMAIL = "nobuo.2.17.93@gmail.com";
 const TEST_PASSWORD = "testlogin1234!";
 
 function hasAdminEnv(): boolean {
@@ -30,7 +30,7 @@ async function ensureTestAdminProfile() {
     const admin = createAdminClient();
     await admin
       .from("profiles")
-      .update({ role: "admin", full_name: "テスト管理者" })
+      .update({ role: "admin", full_name: "Vars管理者" })
       .eq("email", TEST_EMAIL);
   } catch {
     // プロフィール更新失敗はログイン自体を妨げない
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       email: TEST_EMAIL,
       password: TEST_PASSWORD,
       email_confirm: true,
-      user_metadata: { full_name: "テスト管理者" },
+      user_metadata: { full_name: "Vars管理者" },
     });
 
     if (createError && !createError.message.toLowerCase().includes("already")) {
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       const { error: signUpError } = await supabase.auth.signUp({
         email: TEST_EMAIL,
         password: TEST_PASSWORD,
-        options: { data: { full_name: "テスト管理者" } },
+        options: { data: { full_name: "Vars管理者" } },
       });
       if (signUpError) {
         return NextResponse.json(

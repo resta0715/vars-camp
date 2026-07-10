@@ -45,7 +45,7 @@ function TestLoginForm() {
     setTestError(null);
 
     const supabase = createClient();
-    const email = "test@vars-camp.dev";
+    const email = "nobuo.2.17.93@gmail.com";
     const password = "testlogin1234!";
 
     try {
@@ -55,7 +55,7 @@ function TestLoginForm() {
         const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: "テスト管理者" } },
+          options: { data: { full_name: "Vars管理者" } },
         });
         if (signUpError) {
           setTestError(

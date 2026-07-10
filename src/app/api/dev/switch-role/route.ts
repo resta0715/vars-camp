@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const DEV_EMAILS = ["mdit2416@gmail.com", "test@vars-camp.dev"];
+const DEV_EMAILS = ["mdit2416@gmail.com", "nobuo.2.17.93@gmail.com"];
 const VALID_ROLES = ["admin", "instructor", "subscriber", "free"];
 
 export async function POST(request: NextRequest) {

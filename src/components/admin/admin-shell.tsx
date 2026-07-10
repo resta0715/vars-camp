@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
-const DEV_EMAILS = ["mdit2416@gmail.com", "test@vars-camp.dev"];
+const DEV_EMAILS = ["mdit2416@gmail.com", "nobuo.2.17.93@gmail.com"];
 
 const sidebarItems = [
   { href: "/admin", icon: LayoutDashboard, label: "ダッシュボード" },
