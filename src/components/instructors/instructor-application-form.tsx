@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle, Loader2 } from "lucide-react";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
+import { InstructorPhotoUpload } from "@/components/instructors/instructor-photo-upload";
 import {
   ARCHIVE_PERMISSIONS,
   CONTACT_PREFERENCES,
@@ -63,6 +64,7 @@ function SelectField({
 
 export function InstructorApplicationForm() {
   const router = useRouter();
+  const uploadSessionId = useMemo(() => crypto.randomUUID(), []);
   const [form, setForm] = useState<InstructorApplicationFormData>(EMPTY_APPLICATION_FORM);
   const [industriesInput, setIndustriesInput] = useState("");
   const [contactEmail, setContactEmail] = useState("");
@@ -99,7 +101,7 @@ export function InstructorApplicationForm() {
 
         const profilePromise = supabase
           .from("profiles")
-          .select("full_name, phone, salon_location")
+          .select("full_name, phone, salon_location, avatar_url")
           .eq("id", user.id)
           .single();
 
@@ -116,6 +118,7 @@ export function InstructorApplicationForm() {
             full_name: profile.full_name || prev.full_name,
             phone: profile.phone || prev.phone,
             salon_location: profile.salon_location || prev.salon_location,
+            avatar_url: profile.avatar_url || prev.avatar_url,
           }));
         }
       } catch {
@@ -272,6 +275,12 @@ export function InstructorApplicationForm() {
           <CardDescription>お名前・ご連絡先をご記入ください</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
+          <InstructorPhotoUpload
+            avatarUrl={form.avatar_url}
+            onAvatarUrlChange={(url) => update("avatar_url", url)}
+            uploadSessionId={uploadSessionId}
+            onError={setError}
+          />
           <div className="sm:col-span-2">
             <FieldLabel required>お名前</FieldLabel>
             <Input

@@ -49,6 +49,7 @@ export type InstructorApplicationFormData = {
   full_name: string;
   phone: string;
   salon_location: string;
+  avatar_url: string;
   industries: string[];
   website_url: string;
   strengths: string;
@@ -69,6 +70,7 @@ export const EMPTY_APPLICATION_FORM: InstructorApplicationFormData = {
   full_name: "",
   phone: "",
   salon_location: "",
+  avatar_url: "",
   industries: [],
   website_url: "",
   strengths: "",

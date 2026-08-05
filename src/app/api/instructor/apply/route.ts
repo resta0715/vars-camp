@@ -51,6 +51,7 @@ export async function POST(request: Request) {
     .from("profiles")
     .update({
       full_name: body.full_name.trim(),
+      avatar_url: body.avatar_url?.trim() || null,
       salon_name: body.salon_name?.trim() || null,
       phone: body.phone.trim(),
       salon_location: body.salon_location.trim(),
