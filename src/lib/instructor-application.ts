@@ -117,7 +117,7 @@ export function validateApplicationPayload(
   }
 
   if (!Array.isArray(body.industries) || body.industries.length === 0) {
-    return "業種を1つ以上入力してください";
+    return "専門分野を1つ以上入力してください";
   }
 
   return null;

@@ -269,7 +269,7 @@ export function InstructorApplicationForm() {
       <Card>
         <CardHeader>
           <CardTitle>基本情報</CardTitle>
-          <CardDescription>お名前・連絡先をご記入ください</CardDescription>
+          <CardDescription>お名前・ご連絡先をご記入ください</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
@@ -301,19 +301,20 @@ export function InstructorApplicationForm() {
             />
           </div>
           <div>
-            <FieldLabel required>業態</FieldLabel>
+            <FieldLabel required>肩書き・活動形態</FieldLabel>
             <Input
               value={form.business_type}
               onChange={(e) => update("business_type", e.target.value)}
+              placeholder="経営コンサルタント、税理士、個人事業主 など"
               required
             />
           </div>
           <div className="sm:col-span-2">
-            <FieldLabel required>業種（カンマ区切り）</FieldLabel>
+            <FieldLabel required>専門分野（カンマ区切り）</FieldLabel>
             <Input
               value={industriesInput}
               onChange={(e) => setIndustriesInput(e.target.value)}
-              placeholder="美容室, ヘアカラー"
+              placeholder="経営, 集客, 人事 など"
               required
             />
           </div>
@@ -340,7 +341,7 @@ export function InstructorApplicationForm() {
               className={`${fieldClass} min-h-[88px]`}
               value={form.strengths}
               onChange={(e) => update("strengths", e.target.value)}
-              placeholder="経営数字、集客、技術指導など"
+              placeholder="経営、マーケティング、組織づくり など"
             />
           </div>
           <div>
@@ -349,6 +350,7 @@ export function InstructorApplicationForm() {
               className={`${fieldClass} min-h-[88px]`}
               value={form.training_topics}
               onChange={(e) => update("training_topics", e.target.value)}
+              placeholder="サロン経営、スタッフ育成、数字の見える化 など"
             />
           </div>
           <div>
@@ -357,6 +359,7 @@ export function InstructorApplicationForm() {
               className={`${fieldClass} min-h-[88px]`}
               value={form.work_description}
               onChange={(e) => update("work_description", e.target.value)}
+              placeholder="コンサルティング、セミナー講師、執筆・メディア など"
             />
           </div>
         </CardContent>

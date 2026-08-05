@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
   const industries = body.industries.map((i) => i.trim()).filter(Boolean);
   if (industries.length === 0) {
-    return NextResponse.json({ error: "業種を1つ以上入力してください" }, { status: 400 });
+    return NextResponse.json({ error: "専門分野を1つ以上入力してください" }, { status: 400 });
   }
 
   const { error } = await supabase
