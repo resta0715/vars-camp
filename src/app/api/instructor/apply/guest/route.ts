@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     salon_name: "",
     phone: body.phone.trim(),
     salon_location: body.salon_location.trim(),
-    business_type: body.business_type.trim(),
+    business_type: "",
     industries,
     website_url: body.website_url?.trim() || null,
     strengths: body.strengths?.trim() || null,

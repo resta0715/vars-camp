@@ -300,15 +300,6 @@ export function InstructorApplicationForm() {
               required
             />
           </div>
-          <div>
-            <FieldLabel required>肩書き・活動形態</FieldLabel>
-            <Input
-              value={form.business_type}
-              onChange={(e) => update("business_type", e.target.value)}
-              placeholder="経営コンサルタント、税理士、個人事業主 など"
-              required
-            />
-          </div>
           <div className="sm:col-span-2">
             <FieldLabel required>専門分野（カンマ区切り）</FieldLabel>
             <Input

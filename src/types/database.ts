@@ -44,7 +44,7 @@ export interface InstructorApplicationPayload {
   salon_name?: string;
   phone: string;
   salon_location: string;
-  business_type: string;
+  business_type?: string;
   industries: string[];
   website_url?: string;
   strengths?: string;

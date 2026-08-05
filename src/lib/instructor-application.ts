@@ -49,7 +49,6 @@ export type InstructorApplicationFormData = {
   full_name: string;
   phone: string;
   salon_location: string;
-  business_type: string;
   industries: string[];
   website_url: string;
   strengths: string;
@@ -70,7 +69,6 @@ export const EMPTY_APPLICATION_FORM: InstructorApplicationFormData = {
   full_name: "",
   phone: "",
   salon_location: "",
-  business_type: "",
   industries: [],
   website_url: "",
   strengths: "",
@@ -101,7 +99,6 @@ export function validateApplicationPayload(
     "full_name",
     "phone",
     "salon_location",
-    "business_type",
     "interest_level",
     "preferred_time_slot",
     "qa_preference",
