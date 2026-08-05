@@ -1,9 +1,20 @@
+import nextDynamic from "next/dynamic";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowLeft, ClipboardList } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { InstructorApplicationForm } from "@/components/instructors/instructor-application-form";
+import { InstructorApplicationFormSkeleton } from "@/components/instructors/instructor-application-form-skeleton";
+
+const InstructorApplicationForm = nextDynamic(
+  () =>
+    import("@/components/instructors/instructor-application-form").then((mod) => ({
+      default: mod.InstructorApplicationForm,
+    })),
+  { loading: () => <InstructorApplicationFormSkeleton /> }
+);
+
+export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "講師様アンケート | vars camp",

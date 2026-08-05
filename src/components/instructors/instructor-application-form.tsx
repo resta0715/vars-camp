@@ -1,5 +1,6 @@
 "use client";
 
+import nextDynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
-import { InstructorPhotoUpload } from "@/components/instructors/instructor-photo-upload";
 import { IndustryLinksInput } from "@/components/instructors/industry-links-input";
 import {
   ARCHIVE_PERMISSIONS,
@@ -23,6 +23,14 @@ import {
   TIME_SLOTS,
   type InstructorApplicationFormData,
 } from "@/lib/instructor-application";
+
+const InstructorPhotoUpload = nextDynamic(
+  () =>
+    import("@/components/instructors/instructor-photo-upload").then((mod) => ({
+      default: mod.InstructorPhotoUpload,
+    })),
+  { ssr: false }
+);
 
 const fieldClass =
   "flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-500";
@@ -74,7 +82,6 @@ export function InstructorApplicationForm() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
-  const [authChecking, setAuthChecking] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -83,10 +90,6 @@ export function InstructorApplicationForm() {
   useEffect(() => {
     let active = true;
     const supabase = createClient();
-
-    const timeout = window.setTimeout(() => {
-      if (active) setAuthChecking(false);
-    }, 3000);
 
     (async () => {
       try {
@@ -100,7 +103,7 @@ export function InstructorApplicationForm() {
         setUserEmail(user.email || "");
         setContactEmail(user.email || "");
 
-        const profilePromise = supabase
+        const { data: profile } = await supabase
           .from("profiles")
           .select(
             "full_name, phone, salon_location, avatar_url, industry_links, industries, website_urls, website_url"
@@ -108,14 +111,7 @@ export function InstructorApplicationForm() {
           .eq("id", user.id)
           .single();
 
-        const { data: profile } = await Promise.race([
-          profilePromise,
-          new Promise<{ data: null }>((resolve) =>
-            window.setTimeout(() => resolve({ data: null }), 2500)
-          ),
-        ]);
-
-        if (profile) {
+        if (active && profile) {
           setForm((prev) => ({
             ...prev,
             full_name: profile.full_name || prev.full_name,
@@ -127,14 +123,11 @@ export function InstructorApplicationForm() {
         }
       } catch {
         // Supabase 未接続時もゲスト送信は可能
-      } finally {
-        if (active) setAuthChecking(false);
       }
     })();
 
     return () => {
       active = false;
-      window.clearTimeout(timeout);
     };
   }, []);
 
@@ -265,12 +258,6 @@ export function InstructorApplicationForm() {
 
   return (
     <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-8">
-      {authChecking && (
-        <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-500">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          ログイン状態を確認中...
-        </div>
-      )}
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}

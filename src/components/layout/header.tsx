@@ -31,8 +31,9 @@ export function Header({ user: userProp }: HeaderProps) {
     const supabase = createClient();
     (async () => {
       const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const authUser = session?.user;
       if (!authUser) return;
       const { data } = await supabase
         .from("profiles")
