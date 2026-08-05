@@ -135,7 +135,7 @@ export function Header({ user: userProp }: HeaderProps) {
                 </Button>
               </Link>
               <Link href="/auth/login?mode=signup">
-                <Button size="sm">無料で始める</Button>
+                <Button size="sm">美容師会員登録</Button>
               </Link>
             </div>
           )}

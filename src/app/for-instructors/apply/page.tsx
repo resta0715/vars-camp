@@ -20,7 +20,7 @@ export const dynamic = "force-static";
 export const metadata: Metadata = {
   title: pageTitle("講師様アンケート"),
   description:
-    "講師候補の方へのアンケートです。ご希望をお聞かせください。必要に応じてアカウント作成もできます。",
+    "講師登壇希望者向けのアンケートです。美容師会員登録とは別の手続きで、運営承認後に講師として公開されます。",
 };
 
 export default function InstructorApplyPage() {
@@ -42,8 +42,12 @@ export default function InstructorApplyPage() {
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Vアカデミー 講師様アンケート</h1>
             <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-gray-600">
-              オンラインセミナーと「繋ぐ会」の仕組みづくりに向けて、ご希望や実情をお聞かせください。
-              アカウント作成は任意です。希望される方はパスワードを設定して登録できます。
+              登壇を希望される講師の方専用です。
+              <strong className="font-medium text-gray-800">美容師会員登録（研修受講）とは別</strong>
+              のお手続きで、内容確認後に運営が承認します。
+            </p>
+            <p className="mx-auto mt-2 max-w-xl text-xs text-gray-500">
+              すでに美容師会員の方も、ここから講師登録を申し込めます（承認までは受講者アカウントのままです）。
             </p>
           </div>
           <InstructorApplicationForm />

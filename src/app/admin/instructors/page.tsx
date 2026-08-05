@@ -87,7 +87,7 @@ export default function InstructorsPage() {
           <CardContent className="py-12 text-center">
             <GraduationCap className="mx-auto h-12 w-12 text-gray-300" />
             <p className="mt-4 text-gray-400">
-              講師がまだいません。会員管理ページで講師権限を付与してください。
+              公開中の講師がまだいません。講師申込を承認すると、講師一覧に表示されます。
             </p>
           </CardContent>
         </Card>

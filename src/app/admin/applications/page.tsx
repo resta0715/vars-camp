@@ -326,7 +326,7 @@ export default function ApplicationsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">講師申込</h1>
           <p className="mt-1 text-sm text-gray-500">
-            承認すると、アンケート内容がそのまま講師一覧に公開されます
+            美容師会員登録とは別の、講師登壇希望のアンケートです。承認後に講師一覧へ公開されます。
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -381,7 +381,7 @@ export default function ApplicationsPage() {
               <ClipboardList className="mx-auto h-12 w-12 text-gray-300" />
               <p className="mt-4 text-gray-400">該当する申込がありません</p>
               <p className="mt-2 text-xs text-gray-400">
-                未ログイン送信は「ゲスト」、ログイン後の送信は「会員」として表示されます
+                「未ログイン」はアンケートのみ、「ログイン済み」は美容師会員アカウントからの申込です
               </p>
             </div>
           ) : (
@@ -417,7 +417,7 @@ export default function ApplicationsPage() {
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="font-semibold text-gray-900">{row.full_name}</span>
                             <Badge variant="outline" className="text-[10px]">
-                              {row.source === "guest" ? "ゲスト" : "会員"}
+                              {row.source === "guest" ? "未ログイン" : "ログイン済み"}
                             </Badge>
                             <span
                               className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${status.className}`}

@@ -443,11 +443,11 @@ export function InstructorApplicationForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>連絡先・アカウント</CardTitle>
+          <CardTitle>連絡先</CardTitle>
           <CardDescription>
             {loggedIn
-              ? `ログイン中: ${userEmail}`
-              : "アンケート送信にはメールアドレスが必要です。希望される方はパスワードを設定してアカウントも作成できます。"}
+              ? `美容師会員としてログイン中: ${userEmail}。ここから送信するのは講師登録の申込みで、承認までは受講者アカウントのままです。`
+              : "アンケート送信にはメールアドレスが必要です。美容師会員登録とは別の手続きです。"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -463,7 +463,7 @@ export function InstructorApplicationForm() {
                   required
                 />
               </div>
-              <label className="flex items-start gap-3 rounded-lg border border-brand-100 bg-brand-50/50 p-4">
+              <label className="flex items-start gap-3 rounded-lg border border-gray-100 bg-gray-50 p-4">
                 <input
                   type="checkbox"
                   checked={createAccount}
@@ -471,9 +471,9 @@ export function InstructorApplicationForm() {
                   className="mt-0.5 h-4 w-4 rounded border-gray-300"
                 />
                 <span className="text-sm text-gray-700">
-                  <span className="font-medium text-gray-900">アカウントも作成する</span>
+                  <span className="font-medium text-gray-900">ログイン用アカウントも作成する（任意）</span>
                   <br />
-                  パスワードを設定すると、次回からメールとパスワードでログインできます（任意）
+                  美容師会員登録ではなく、次回以降のアンケート確認用です。講師として公開されるのは運営承認後です。
                 </span>
               </label>
               {createAccount && (
@@ -501,7 +501,7 @@ export function InstructorApplicationForm() {
                 </div>
               )}
               <p className="text-xs text-gray-500">
-                すでに Google / LINE で登録済みの方は{" "}
+                すでに美容師会員登録済みの方は{" "}
                 <Link href="/auth/login?redirect=/for-instructors/apply" className="text-brand-600 underline">
                   ログイン
                 </Link>

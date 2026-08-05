@@ -317,7 +317,11 @@ export default function ForInstructorsPage() {
             <Link href={SURVEY_HREF}>Vアカデミー 講師様アンケートへ</Link>
           </Button>
           <p className="mx-auto mt-6 max-w-lg text-center text-sm text-brand-100/90">
-            すでに会員として Vアカデミーをご利用の方は、ログインしてからアンケートを送信してください。
+            研修を受講する美容師の方は
+            <Link href="/auth/login?mode=signup" className="mx-1 underline underline-offset-4">
+              美容師会員登録
+            </Link>
+            から。講師として登壇したい方は上のアンケートへ。
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-brand-100">
             <Link href="/" className="underline-offset-4 hover:underline">

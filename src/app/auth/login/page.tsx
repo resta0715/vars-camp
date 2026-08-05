@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { BookOpen, KeyRound, Loader2, Scissors, GraduationCap, ArrowLeft } from "lucide-react";
+import { BookOpen, KeyRound, Loader2, Scissors } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -175,32 +175,19 @@ function EmailPasswordLoginForm({ redirect }: { redirect: string }) {
   );
 }
 
-type SignupRole = "stylist" | "instructor";
-
 function LoginForm() {
   const searchParams = useSearchParams();
   const isSignup = searchParams.get("mode") === "signup";
   const redirect = searchParams.get("redirect") || "/dashboard";
   const roleParam = searchParams.get("role");
   const [loading, setLoading] = useState<string | null>(null);
-  const [chosenRole, setChosenRole] = useState<SignupRole | null>(
-    roleParam === "instructor" || roleParam === "stylist" ? roleParam : null
-  );
 
   const handleLogin = async (provider: "google" | "line") => {
     setLoading(provider);
     const supabase = createClient();
 
-    // 登録時は選択した役割に応じてリダイレクト先と昇格フラグを切り替える
-    let finalRedirect = redirect;
-    let extra = "";
-    if (isSignup && chosenRole === "instructor") {
-      finalRedirect = "/instructor/profile";
-      extra = "&signup_role=instructor";
-    } else if (isSignup && chosenRole === "stylist") {
-      finalRedirect = "/dashboard";
-    }
-    const callbackUrl = `${window.location.origin}/api/auth/callback?redirect=${finalRedirect}${extra}`;
+    const finalRedirect = isSignup ? "/dashboard" : redirect;
+    const callbackUrl = `${window.location.origin}/api/auth/callback?redirect=${finalRedirect}`;
 
     if (provider === "google") {
       await supabase.auth.signInWithOAuth({
@@ -218,57 +205,25 @@ function LoginForm() {
     }
   };
 
-  // 登録時で役割未選択 → 役割選択画面
-  if (isSignup && !chosenRole) {
+  if (isSignup && roleParam === "instructor") {
     return (
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <Link href="/" className="mx-auto mb-4 flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-brand">
-              <BookOpen className="h-5 w-5 text-white" />
-            </div>
-            <BrandName className="text-2xl font-bold text-gray-900" />
-          </Link>
-          <CardTitle className="text-xl">どちらで登録しますか？</CardTitle>
-          <CardDescription>あとから変更が必要な場合は運営にご連絡ください</CardDescription>
+          <CardTitle className="text-xl">講師登録は別の手続きです</CardTitle>
+          <CardDescription>
+            講師としての登壇希望は、美容師会員登録とは別にアンケートで受け付けています。
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <button
-            type="button"
-            onClick={() => setChosenRole("stylist")}
-            className="flex w-full items-center gap-4 rounded-xl border-2 border-gray-200 p-4 text-left transition-colors hover:border-brand-400 hover:bg-brand-50"
-          >
-            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-600">
-              <Scissors className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="font-semibold text-gray-900">美容師として登録</p>
-              <p className="text-sm text-gray-500">研修を受講・予約する</p>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setChosenRole("instructor")}
-            className="flex w-full items-center gap-4 rounded-xl border-2 border-gray-200 p-4 text-left transition-colors hover:border-green-400 hover:bg-green-50"
-          >
-            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600">
-              <GraduationCap className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="font-semibold text-gray-900">講師として登録</p>
-              <p className="text-sm text-gray-500">研修を開催・配信する</p>
-            </div>
-          </button>
-
-          <div className="pt-2 text-center">
-            <p className="text-sm text-gray-500">
-              すでにアカウントをお持ちですか？{" "}
-              <Link href="/auth/login" className="text-brand-600 hover:underline">
-                ログイン
-              </Link>
-            </p>
-          </div>
+        <CardContent className="space-y-4">
+          <p className="text-sm leading-relaxed text-gray-600">
+            研修を受講する美容師の方は「美容師会員登録」、登壇を希望する講師の方は「講師アンケート」からお進みください。
+          </p>
+          <Button asChild className="w-full">
+            <Link href="/for-instructors/apply">講師アンケートへ</Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full">
+            <Link href="/auth/login?mode=signup">美容師会員登録へ</Link>
+          </Button>
         </CardContent>
       </Card>
     );
@@ -283,29 +238,28 @@ function LoginForm() {
           </div>
           <BrandName className="text-2xl font-bold text-gray-900" />
         </Link>
-        <CardTitle className="text-xl">
-          {isSignup
-            ? chosenRole === "instructor"
-              ? "講師として登録"
-              : "美容師として登録"
-            : "ログイン"}
-        </CardTitle>
+        <CardTitle className="text-xl">{isSignup ? "美容師会員登録" : "ログイン"}</CardTitle>
         <CardDescription>
           {isSignup
-            ? "Google または LINE でかんたん登録"
+            ? "研修を受講・予約する美容師の方用です。Google または LINE で登録できます。"
             : "アカウントにログインしてください"}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isSignup && (
-          <button
-            type="button"
-            onClick={() => setChosenRole(null)}
-            className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            登録区分を選び直す
-          </button>
+          <div className="rounded-lg border border-brand-100 bg-brand-50/60 px-4 py-3 text-sm text-gray-700">
+            <p className="flex items-start gap-2">
+              <Scissors className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-600" />
+              <span>
+                ここでの登録は<strong className="font-semibold">受講者（美容師）向け</strong>です。
+                講師として登壇したい方は
+                <Link href="/for-instructors/apply" className="mx-1 font-medium text-brand-700 underline">
+                  講師アンケート
+                </Link>
+                からお申し込みください。
+              </span>
+            </p>
+          </div>
         )}
         <Button
           variant="outline"
@@ -341,7 +295,7 @@ function LoginForm() {
             <p className="text-sm text-gray-500">
               アカウントをお持ちでないですか？{" "}
               <Link href="/auth/login?mode=signup" className="text-brand-600 hover:underline">
-                無料で登録
+                美容師会員登録
               </Link>
             </p>
           )}
