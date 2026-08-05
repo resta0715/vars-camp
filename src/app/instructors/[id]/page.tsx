@@ -75,8 +75,10 @@ export default async function InstructorDetailPage({
                   <h1 className="text-2xl font-bold text-gray-900">
                     {instructor.full_name || "名前未設定"}
                   </h1>
-                  {instructor.salon_name && (
-                    <p className="mt-1 text-sm text-gray-500">{instructor.salon_name}</p>
+                  {(instructor.salon_location || instructor.salon_name) && (
+                    <p className="mt-1 text-sm text-gray-500">
+                      {instructor.salon_location || instructor.salon_name}
+                    </p>
                   )}
                   {(instructor.industries || []).length > 0 && (
                     <div className="mt-3 flex flex-wrap justify-center gap-1.5 sm:justify-start">

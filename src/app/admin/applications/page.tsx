@@ -287,45 +287,31 @@ export default function ApplicationsPage() {
 
   const pendingCount = applications.filter((row) => row.status === "pending").length;
 
-  const updateStatus = async (
-    row: ApplicationRow,
-    status: InstructorApplicationStatus,
-    approveAsInstructor = false
-  ) => {
+  const updateStatus = async (row: ApplicationRow, status: InstructorApplicationStatus) => {
     const label = status === "approved" ? "承認" : "却下";
     const extra =
-      approveAsInstructor && status === "approved"
-        ? "（講師権限を付与します）"
+      status === "approved"
+        ? "（アンケート内容をそのまま講師一覧に公開します）"
         : "";
     if (!confirm(`${row.full_name} さんの申込を${label}しますか？${extra}`)) return;
 
     setActingKey(row.key);
-    const supabase = createClient();
 
-    if (row.source === "guest") {
-      const { error: updateError } = await supabase
-        .from("instructor_application_submissions")
-        .update({ status })
-        .eq("id", row.id);
-      if (updateError) {
-        alert("更新に失敗しました: " + updateError.message);
-        setActingKey(null);
-        return;
-      }
-    } else {
-      const payload: Partial<Profile> = { instructor_application_status: status };
-      if (approveAsInstructor && status === "approved") {
-        payload.role = "instructor";
-      }
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update(payload)
-        .eq("id", row.id);
-      if (updateError) {
-        alert("更新に失敗しました: " + updateError.message);
-        setActingKey(null);
-        return;
-      }
+    const response = await fetch("/api/admin/applications/review", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        source: row.source,
+        id: row.id,
+        status,
+      }),
+    });
+
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      alert("更新に失敗しました: " + (result.error || "不明なエラー"));
+      setActingKey(null);
+      return;
     }
 
     setApplications((prev) =>
@@ -340,7 +326,7 @@ export default function ApplicationsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">講師申込</h1>
           <p className="mt-1 text-sm text-gray-500">
-            講師アンケートの送信内容を確認・承認できます
+            承認すると、アンケート内容がそのまま講師一覧に公開されます
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -457,9 +443,7 @@ export default function ApplicationsPage() {
                           <Button
                             size="sm"
                             disabled={isActing}
-                            onClick={() =>
-                              updateStatus(row, "approved", row.source === "member")
-                            }
+                            onClick={() => updateStatus(row, "approved")}
                           >
                             <Check className="mr-1 h-3.5 w-3.5" />
                             承認

@@ -20,9 +20,10 @@ export default async function InstructorsPage() {
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id, full_name, avatar_url, industries, strengths, training_topics, work_description, salon_name, created_at"
+      "id, full_name, avatar_url, industries, strengths, training_topics, work_description, salon_name, salon_location, created_at"
     )
     .eq("is_public", true)
+    .eq("role", "instructor")
     .order("created_at", { ascending: false });
 
   const instructors = data || [];

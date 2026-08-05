@@ -17,6 +17,7 @@ export interface PublicInstructor {
   training_topics: string | null;
   work_description: string | null;
   salon_name: string | null;
+  salon_location?: string | null;
   created_at: string;
 }
 
@@ -53,6 +54,7 @@ export function InstructorsList({ instructors }: InstructorsListProps) {
       const haystack = [
         i.full_name,
         i.salon_name,
+        i.salon_location,
         i.strengths,
         i.training_topics,
         i.work_description,
@@ -172,8 +174,10 @@ export function InstructorsList({ instructors }: InstructorsListProps) {
                         <p className="font-semibold text-gray-900 truncate">
                           {inst.full_name || "名前未設定"}
                         </p>
-                        {inst.salon_name && (
-                          <p className="text-xs text-gray-400 truncate">{inst.salon_name}</p>
+                        {(inst.salon_location || inst.salon_name) && (
+                          <p className="text-xs text-gray-400 truncate">
+                            {inst.salon_location || inst.salon_name}
+                          </p>
                         )}
                         {(inst.industries || []).length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-1">
