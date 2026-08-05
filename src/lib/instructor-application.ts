@@ -190,3 +190,11 @@ export function normalizeWebsiteUrls(urls: string[] | undefined): string[] {
   if (!Array.isArray(urls)) return [];
   return urls.map(normalizeWebsiteUrl).filter(Boolean);
 }
+
+export function optionLabel(
+  options: readonly { value: string; label: string }[],
+  value: string | null | undefined
+): string {
+  if (!value) return "-";
+  return options.find((option) => option.value === value)?.label || value;
+}

@@ -10,10 +10,12 @@ import {
   FolderOpen,
   ArrowLeft,
   BookOpen,
+  ClipboardList,
 } from "lucide-react";
 
 const sidebarItems = [
   { href: "/admin", icon: LayoutDashboard, label: "ダッシュボード" },
+  { href: "/admin/applications", icon: ClipboardList, label: "講師申込" },
   { href: "/admin/members", icon: Users, label: "会員管理" },
   { href: "/admin/instructors", icon: GraduationCap, label: "講師管理" },
   { href: "/admin/seminars", icon: Calendar, label: "研修管理" },

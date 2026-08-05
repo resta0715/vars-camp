@@ -66,6 +66,35 @@ export interface InstructorApplicationPayload {
   application_notes?: string;
 }
 
+export interface InstructorApplicationSubmission {
+  id: string;
+  email: string;
+  full_name: string;
+  avatar_url: string | null;
+  salon_name: string;
+  phone: string;
+  salon_location: string;
+  business_type: string;
+  industries: string[];
+  industry_links: IndustryLink[] | null;
+  website_url: string | null;
+  website_urls: string[] | null;
+  strengths: string | null;
+  training_topics: string | null;
+  work_description: string | null;
+  interest_level: string;
+  preferred_time_slot: string;
+  qa_preference: string;
+  delivery_preference: string | null;
+  archive_permission: string | null;
+  lecture_frequency: string;
+  contact_preference: string;
+  line_intro_ok: boolean | null;
+  application_notes: string | null;
+  status: InstructorApplicationStatus;
+  created_at: string;
+}
+
 export interface Category {
   id: string;
   name: string;
