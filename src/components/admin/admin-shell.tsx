@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -12,11 +10,7 @@ import {
   FolderOpen,
   ArrowLeft,
   BookOpen,
-  Loader2,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-
-const DEV_EMAILS = ["mdit2416@gmail.com", "nobuo.2.17.93@gmail.com"];
 
 const sidebarItems = [
   { href: "/admin", icon: LayoutDashboard, label: "ダッシュボード" },
@@ -27,42 +21,12 @@ const sidebarItems = [
   { href: "/admin/categories", icon: FolderOpen, label: "カテゴリ管理" },
 ];
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
-  const [userLabel, setUserLabel] = useState("");
+type Props = {
+  children: React.ReactNode;
+  userLabel: string;
+};
 
-  useEffect(() => {
-    let active = true;
-    const supabase = createClient();
-    (async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        router.replace("/auth/login?redirect=/admin");
-        return;
-      }
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role, full_name")
-        .eq("id", user.id)
-        .single();
-
-      const isDevUser = DEV_EMAILS.includes(user.email || "");
-      if (!active) return;
-      if (profile?.role !== "admin" && !isDevUser) {
-        router.replace("/dashboard");
-        return;
-      }
-      setUserLabel(profile?.full_name || user.email || "");
-      setAuthorized(true);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [router]);
-
+export function AdminShell({ children, userLabel }: Props) {
   return (
     <div className="flex min-h-screen">
       <aside className="fixed inset-y-0 left-0 z-50 w-64 border-r border-gray-200 bg-white">
@@ -78,7 +42,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        <nav className="p-4 space-y-1">
+        <nav className="space-y-1 p-4">
           {sidebarItems.map((item) => (
             <Link
               key={item.href}
@@ -92,9 +56,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="absolute bottom-0 w-full border-t border-gray-200 p-4">
-          <p className="mb-2 text-xs text-gray-400">
-            {userLabel ? `ログイン中: ${userLabel}` : "認証確認中..."}
-          </p>
+          <p className="mb-2 text-xs text-gray-400">ログイン中: {userLabel}</p>
           <Link
             href="/"
             className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-700"
@@ -105,16 +67,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <main className="ml-64 flex-1 bg-gray-50 p-8">
-        {authorized ? (
-          children
-        ) : (
-          <div className="flex items-center justify-center py-24 text-gray-400">
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            読み込み中...
-          </div>
-        )}
-      </main>
+      <main className="ml-64 flex-1 bg-gray-50 p-8">{children}</main>
     </div>
   );
 }

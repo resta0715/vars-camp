@@ -14,8 +14,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RoleSwitcher } from "@/components/admin/role-switcher";
 import { pageTitle } from "@/lib/brand";
+import { ADMIN_DEV_EMAILS } from "@/lib/admin-access";
 
-const DEV_EMAILS = ["mdit2416@gmail.com", "nobuo.2.17.93@gmail.com"];
+const DEV_EMAILS = ADMIN_DEV_EMAILS;
 
 export const metadata = {
   title: pageTitle("マイページ"),
