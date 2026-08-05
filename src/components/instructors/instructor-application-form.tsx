@@ -290,15 +290,17 @@ export function InstructorApplicationForm() {
               required
             />
           </div>
-          <div>
-            <FieldLabel required>電話番号</FieldLabel>
+          <div className="sm:col-span-2">
+            <FieldLabel>電話番号（サイト上に表示してよい方のみ）</FieldLabel>
             <Input
               type="tel"
               value={form.phone}
               onChange={(e) => update("phone", e.target.value)}
               placeholder="090-1234-5678"
-              required
             />
+            <p className="mt-1.5 text-xs text-gray-500">
+              任意です。入力された場合のみ、講師プロフィール等に表示されることがあります。
+            </p>
           </div>
           <div>
             <FieldLabel required>所在地</FieldLabel>

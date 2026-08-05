@@ -99,7 +99,6 @@ export function validateApplicationPayload(
 ): string | null {
   const required: (keyof InstructorApplicationFormData)[] = [
     "full_name",
-    "phone",
     "salon_location",
     "interest_level",
     "preferred_time_slot",

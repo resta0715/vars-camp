@@ -42,7 +42,7 @@ export interface Profile {
 export interface InstructorApplicationPayload {
   full_name: string;
   salon_name?: string;
-  phone: string;
+  phone?: string;
   salon_location: string;
   avatar_url?: string;
   industries: string[];
