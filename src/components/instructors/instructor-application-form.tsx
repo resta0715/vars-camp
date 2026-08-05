@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 import { InstructorPhotoUpload } from "@/components/instructors/instructor-photo-upload";
-import { IndustryTagsInput } from "@/components/instructors/industry-tags-input";
+import { StringTagsInput } from "@/components/instructors/string-tags-input";
 import {
   ARCHIVE_PERMISSIONS,
   CONTACT_PREFERENCES,
@@ -17,6 +17,7 @@ import {
   EMPTY_APPLICATION_FORM,
   INTEREST_LEVELS,
   LECTURE_FREQUENCIES,
+  normalizeWebsiteUrl,
   QA_PREFERENCES,
   TIME_SLOTS,
   type InstructorApplicationFormData,
@@ -100,7 +101,7 @@ export function InstructorApplicationForm() {
 
         const profilePromise = supabase
           .from("profiles")
-          .select("full_name, phone, salon_location, avatar_url, industries")
+          .select("full_name, phone, salon_location, avatar_url, industries, website_urls, website_url")
           .eq("id", user.id)
           .single();
 
@@ -119,6 +120,11 @@ export function InstructorApplicationForm() {
             salon_location: profile.salon_location || prev.salon_location,
             avatar_url: profile.avatar_url || prev.avatar_url,
             industries: profile.industries?.length ? profile.industries : prev.industries,
+            website_urls: profile.website_urls?.length
+              ? profile.website_urls
+              : profile.website_url
+                ? [profile.website_url]
+                : prev.website_urls,
           }));
         }
       } catch {
@@ -314,22 +320,24 @@ export function InstructorApplicationForm() {
               required
             />
           </div>
-          <IndustryTagsInput
-            industries={form.industries}
+          <StringTagsInput
+            items={form.industries}
             onChange={(industries) => update("industries", industries)}
             label={<FieldLabel required>専門分野</FieldLabel>}
             description="複数追加できます。入力して Enter、または ＋ ボタンで追加してください。"
             placeholder="専門分野を入力して Enter（例: 経営）"
+            addAriaLabel="専門分野を追加"
             required
           />
-          <div className="sm:col-span-2">
-            <FieldLabel>Webサイト・SNS</FieldLabel>
-            <Input
-              value={form.website_url}
-              onChange={(e) => update("website_url", e.target.value)}
-              placeholder="https://"
-            />
-          </div>
+          <StringTagsInput
+            items={form.website_urls}
+            onChange={(website_urls) => update("website_urls", website_urls)}
+            label={<FieldLabel>Webサイト・SNS</FieldLabel>}
+            description="複数追加できます。URL や SNS アカウントを入力して Enter、または ＋ ボタンで追加してください。"
+            placeholder="https://example.com または @account"
+            addAriaLabel="Web/SNS を追加"
+            normalize={normalizeWebsiteUrl}
+          />
         </CardContent>
       </Card>
 

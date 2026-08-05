@@ -51,7 +51,7 @@ export type InstructorApplicationFormData = {
   salon_location: string;
   avatar_url: string;
   industries: string[];
-  website_url: string;
+  website_urls: string[];
   strengths: string;
   training_topics: string;
   work_description: string;
@@ -72,7 +72,7 @@ export const EMPTY_APPLICATION_FORM: InstructorApplicationFormData = {
   salon_location: "",
   avatar_url: "",
   industries: [],
-  website_url: "",
+  website_urls: [],
   strengths: "",
   training_topics: "",
   work_description: "",
@@ -87,12 +87,15 @@ export const EMPTY_APPLICATION_FORM: InstructorApplicationFormData = {
   application_notes: "",
 };
 
-export function parseIndustriesInput(raw: string): string[] {
+export function parseListInput(raw: string): string[] {
   return raw
     .split(/[,、\n]/)
     .map((item) => item.trim())
     .filter(Boolean);
 }
+
+/** @deprecated use parseListInput */
+export const parseIndustriesInput = parseListInput;
 
 export function validateApplicationPayload(
   body: Partial<InstructorApplicationFormData>
@@ -119,4 +122,16 @@ export function validateApplicationPayload(
   }
 
   return null;
+}
+
+export function normalizeWebsiteUrl(raw: string): string {
+  const value = raw.trim();
+  if (!value) return "";
+  if (/^https?:\/\//i.test(value) || value.startsWith("@")) return value;
+  return `https://${value}`;
+}
+
+export function normalizeWebsiteUrls(urls: string[] | undefined): string[] {
+  if (!Array.isArray(urls)) return [];
+  return urls.map(normalizeWebsiteUrl).filter(Boolean);
 }

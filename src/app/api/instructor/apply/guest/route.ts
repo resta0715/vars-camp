@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { validateApplicationPayload } from "@/lib/instructor-application";
+import { validateApplicationPayload, normalizeWebsiteUrls } from "@/lib/instructor-application";
 import type { InstructorApplicationFormData } from "@/lib/instructor-application";
 
 type GuestPayload = InstructorApplicationFormData & { email: string };
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     salon_location: body.salon_location.trim(),
     business_type: "",
     industries,
-    website_url: body.website_url?.trim() || null,
+    website_urls: normalizeWebsiteUrls(body.website_urls),
     strengths: body.strengths?.trim() || null,
     training_topics: body.training_topics?.trim() || null,
     work_description: body.work_description?.trim() || null,

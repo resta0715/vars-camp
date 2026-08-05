@@ -21,7 +21,7 @@ export interface Profile {
   training_topics: string | null;
   work_description: string | null;
   is_public: boolean | null;
-  website_url: string | null;
+  website_urls: string[] | null;
   business_type: string | null;
   // 講師申込
   instructor_application_status: InstructorApplicationStatus | null;
@@ -46,7 +46,7 @@ export interface InstructorApplicationPayload {
   salon_location: string;
   avatar_url?: string;
   industries: string[];
-  website_url?: string;
+  website_urls?: string[];
   strengths?: string;
   training_topics?: string;
   work_description?: string;
