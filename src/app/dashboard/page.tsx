@@ -13,11 +13,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RoleSwitcher } from "@/components/admin/role-switcher";
+import { pageTitle } from "@/lib/brand";
 
 const DEV_EMAILS = ["mdit2416@gmail.com", "nobuo.2.17.93@gmail.com"];
 
 export const metadata = {
-  title: "マイページ | vars camp",
+  title: pageTitle("マイページ"),
 };
 
 const typeLabels: Record<string, { label: string; variant: "realtime" | "ondemand" | "inperson" }> = {

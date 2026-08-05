@@ -5,11 +5,12 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { InstructorsList } from "@/components/instructors/instructors-list";
+import { pageTitle } from "@/lib/brand";
 
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "講師一覧 | vars camp",
+  title: pageTitle("講師一覧"),
   description: "業種や専門分野から、学びたい講師を見つけましょう。",
 };
 

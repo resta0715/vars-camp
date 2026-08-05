@@ -17,12 +17,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Badge } from "@/components/ui/badge";
+import { pageTitle } from "@/lib/brand";
 
 // LP はログイン状態に依存しないため静的配信。ヘッダーのログイン表示はクライアント側で解決する。
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "講師募集 | vars camp",
+  title: pageTitle("講師募集"),
   description:
     "美容室の経営を学ぶオンライン講座の講師を募集しています。仕組みづくりのため、アンケートへのご協力をお願いしています。",
 };
@@ -53,7 +54,7 @@ const benefits = [
     icon: ShieldCheck,
     title: "vars のブランドと信頼",
     description:
-      "美容室向け製品卸「vars」が運営する研修基盤。業界に根ざした信頼感のある場で、自分のコンテンツを安心して載せられます。",
+      "美容室向け製品卸「vars」が運営する「Vアカデミー」。業界に根ざした信頼感のある場で、自分のコンテンツを安心して載せられます。",
   },
 ];
 
@@ -107,7 +108,7 @@ const faqs = [
   },
   {
     q: "すでに他社のオンライン講座を持っていても応募できますか？",
-    a: "可能です。vars camp で扱うテーマやスケジュールが、既存のご提供と矛盾しない範囲で調整します。",
+    a: "可能です。Vアカデミーで扱うテーマやスケジュールが、既存のご提供と矛盾しない範囲で調整します。",
   },
   {
     q: "地方在住でも問題ありませんか？",
@@ -313,10 +314,10 @@ export default function ForInstructorsPage() {
             ご質問やご意見はフォーム内のフリーコメント欄にもご記入いただけます。内容を踏まえて運営からご連絡します。
           </p>
           <Button size="xl" className="mt-8 bg-white text-brand-700 shadow-lg hover:bg-brand-50" asChild>
-            <Link href={SURVEY_HREF}>Vars camp 講師様アンケートへ</Link>
+            <Link href={SURVEY_HREF}>Vアカデミー 講師様アンケートへ</Link>
           </Button>
           <p className="mx-auto mt-6 max-w-lg text-center text-sm text-brand-100/90">
-            すでに会員として vars camp をご利用の方は、ログインしてからアンケートを送信してください。
+            すでに会員として Vアカデミーをご利用の方は、ログインしてからアンケートを送信してください。
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-brand-100">
             <Link href="/" className="underline-offset-4 hover:underline">

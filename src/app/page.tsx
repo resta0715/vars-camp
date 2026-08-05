@@ -128,10 +128,10 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900">
-              vars camp の特徴
+              Vアカデミーの特徴
             </h2>
             <p className="mt-3 text-gray-500">
-              美容室の成長に必要な学びを、すべてここに。
+              美容室の成長に必要な学びを、すべて Vアカデミーで。
             </p>
           </div>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">

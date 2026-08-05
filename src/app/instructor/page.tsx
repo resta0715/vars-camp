@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+import { pageTitle } from "@/lib/brand";
+
 export const metadata = {
-  title: "講師パネル | vars camp",
+  title: pageTitle("講師パネル"),
 };
 
 export default async function InstructorDashboard() {

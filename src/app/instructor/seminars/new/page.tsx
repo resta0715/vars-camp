@@ -403,7 +403,7 @@ export default function NewSeminarPage() {
                     />
                   </div>
                   <p className="text-xs text-gray-500">
-                    受講者はサイト内（vars camp ページ）で視聴します。ZoomのURLは公開されないため、URLの転送による無断視聴を防げます。
+                    受講者はサイト内（Vアカデミーのページ）で視聴します。ZoomのURLは公開されないため、URLの転送による無断視聴を防げます。
                   </p>
                 </>
               )}

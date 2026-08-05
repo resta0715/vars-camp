@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
+import { BrandName } from "@/components/layout/brand-name";
 
 function GoogleIcon() {
   return (
@@ -226,9 +227,7 @@ function LoginForm() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-brand">
               <BookOpen className="h-5 w-5 text-white" />
             </div>
-            <span className="text-2xl font-bold text-gray-900">
-              vars <span className="text-brand-600">camp</span>
-            </span>
+            <BrandName className="text-2xl font-bold text-gray-900" />
           </Link>
           <CardTitle className="text-xl">どちらで登録しますか？</CardTitle>
           <CardDescription>あとから変更が必要な場合は運営にご連絡ください</CardDescription>
@@ -282,9 +281,7 @@ function LoginForm() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-brand">
             <BookOpen className="h-5 w-5 text-white" />
           </div>
-          <span className="text-2xl font-bold text-gray-900">
-            vars <span className="text-brand-600">camp</span>
-          </span>
+          <BrandName className="text-2xl font-bold text-gray-900" />
         </Link>
         <CardTitle className="text-xl">
           {isSignup

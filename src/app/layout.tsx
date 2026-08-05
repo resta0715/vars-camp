@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { BRAND_NAME } from "@/lib/brand";
 
 export const metadata: Metadata = {
-  title: "vars camp | 美容室の経営を学ぶオンライン研修",
+  title: `${BRAND_NAME} | 美容室の経営を学ぶオンライン研修`,
   description:
     "美容室オーナー・スタッフ向けのオンライン研修プラットフォーム。経営戦略、集客、技術、マネジメントを一流の講師から学べます。",
 };

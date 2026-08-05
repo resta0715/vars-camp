@@ -71,7 +71,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <BookOpen className="h-4 w-4 text-white" />
           </div>
           <div>
-            <span className="text-sm font-bold text-gray-900">vars camp</span>
+            <span className="text-sm font-bold text-gray-900">Vアカデミー</span>
             <span className="ml-1 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-700">
               ADMIN
             </span>

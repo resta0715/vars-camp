@@ -5,8 +5,10 @@ import { ScheduleCalendar } from "@/components/schedule/calendar";
 
 export const revalidate = 60;
 
+import { pageTitle } from "@/lib/brand";
+
 export const metadata = {
-  title: "研修スケジュール | vars camp",
+  title: pageTitle("研修スケジュール"),
 };
 
 export default async function SchedulePage() {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
+import { BrandName } from "@/components/layout/brand-name";
 
 export function Footer() {
   return (
@@ -12,12 +13,10 @@ export function Footer() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-brand">
                 <BookOpen className="h-4 w-4 text-white" />
               </div>
-              <span className="text-lg font-bold text-gray-900">
-                vars <span className="text-brand-600">camp</span>
-              </span>
+              <BrandName className="text-lg font-bold text-gray-900" />
             </div>
             <p className="mt-3 max-w-md text-sm text-gray-500">
-              美容室の経営を学ぶオンライン研修プラットフォーム。
+              美容室の経営を学ぶオンライン研修プラットフォーム「Vアカデミー」。
               一流の講師陣から、経営・技術・集客のすべてを学べます。
             </p>
           </div>
@@ -54,7 +53,7 @@ export function Footer() {
             <ul className="mt-3 space-y-2">
               <li>
                 <Link href="/about" className="text-sm text-gray-500 hover:text-brand-600">
-                  vars について
+                  Vアカデミーについて
                 </Link>
               </li>
               <li>

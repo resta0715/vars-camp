@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Menu, X, Calendar, BookOpen, LogIn, LogOut, Shield, GraduationCap, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { BrandName } from "@/components/layout/brand-name";
 
 const DEV_EMAILS = ["mdit2416@gmail.com", "nobuo.2.17.93@gmail.com"];
 
@@ -62,9 +63,7 @@ export function Header({ user: userProp }: HeaderProps) {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-brand">
             <BookOpen className="h-5 w-5 text-white" />
           </div>
-          <span className="text-xl font-bold text-gray-900">
-            vars <span className="text-brand-600">camp</span>
-          </span>
+          <BrandName />
         </Link>
 
         {/* Desktop Nav */}

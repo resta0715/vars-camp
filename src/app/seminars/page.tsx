@@ -10,8 +10,10 @@ import { Badge } from "@/components/ui/badge";
 
 export const revalidate = 60;
 
+import { pageTitle } from "@/lib/brand";
+
 export const metadata = {
-  title: "研修一覧 | vars camp",
+  title: pageTitle("研修一覧"),
 };
 
 const typeLabels: Record<string, { label: string; variant: "realtime" | "ondemand" | "inperson" }> = {
