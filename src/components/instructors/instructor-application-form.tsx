@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 import { InstructorPhotoUpload } from "@/components/instructors/instructor-photo-upload";
-import { StringTagsInput } from "@/components/instructors/string-tags-input";
+import { IndustryLinksInput } from "@/components/instructors/industry-links-input";
 import {
   ARCHIVE_PERMISSIONS,
   CONTACT_PREFERENCES,
@@ -17,7 +17,8 @@ import {
   EMPTY_APPLICATION_FORM,
   INTEREST_LEVELS,
   LECTURE_FREQUENCIES,
-  normalizeWebsiteUrl,
+  normalizeIndustryLinks,
+  parseIndustryLinksFromProfile,
   QA_PREFERENCES,
   TIME_SLOTS,
   type InstructorApplicationFormData,
@@ -101,7 +102,9 @@ export function InstructorApplicationForm() {
 
         const profilePromise = supabase
           .from("profiles")
-          .select("full_name, phone, salon_location, avatar_url, industries, website_urls, website_url")
+          .select(
+            "full_name, phone, salon_location, avatar_url, industry_links, industries, website_urls, website_url"
+          )
           .eq("id", user.id)
           .single();
 
@@ -119,12 +122,7 @@ export function InstructorApplicationForm() {
             phone: profile.phone || prev.phone,
             salon_location: profile.salon_location || prev.salon_location,
             avatar_url: profile.avatar_url || prev.avatar_url,
-            industries: profile.industries?.length ? profile.industries : prev.industries,
-            website_urls: profile.website_urls?.length
-              ? profile.website_urls
-              : profile.website_url
-                ? [profile.website_url]
-                : prev.website_urls,
+            industry_links: parseIndustryLinksFromProfile(profile),
           }));
         }
       } catch {
@@ -151,12 +149,13 @@ export function InstructorApplicationForm() {
     e.preventDefault();
     setError(null);
 
-    const payload = { ...form };
-
-    if (payload.industries.length === 0) {
-      setError("専門分野を1つ以上入力してください");
+    const industry_links = normalizeIndustryLinks(form.industry_links);
+    if (industry_links.length === 0) {
+      setError("業種・専門分野を1つ以上入力してください");
       return;
     }
+
+    const payload = { ...form, industry_links };
     if (!loggedIn && !createAccount && !contactEmail.trim()) {
       setError("メールアドレスを入力してください");
       return;
@@ -320,23 +319,11 @@ export function InstructorApplicationForm() {
               required
             />
           </div>
-          <StringTagsInput
-            items={form.industries}
-            onChange={(industries) => update("industries", industries)}
-            label={<FieldLabel required>専門分野</FieldLabel>}
-            description="複数追加できます。入力して Enter、または ＋ ボタンで追加してください。"
-            placeholder="専門分野を入力して Enter（例: 経営）"
-            addAriaLabel="専門分野を追加"
-            required
-          />
-          <StringTagsInput
-            items={form.website_urls}
-            onChange={(website_urls) => update("website_urls", website_urls)}
-            label={<FieldLabel>Webサイト・SNS</FieldLabel>}
-            description="複数追加できます。URL や SNS アカウントを入力して Enter、または ＋ ボタンで追加してください。"
-            placeholder="https://example.com または @account"
-            addAriaLabel="Web/SNS を追加"
-            normalize={normalizeWebsiteUrl}
+          <IndustryLinksInput
+            links={form.industry_links}
+            onChange={(industry_links) => update("industry_links", industry_links)}
+            label={<FieldLabel required>業種・専門分野と Web/SNS</FieldLabel>}
+            description="業種（専門分野）と、対応する Web サイトや SNS の URL をセットで登録できます。例: 不動産仲介 → HP URL、グルメインフルエンサー → Instagram URL"
           />
         </CardContent>
       </Card>

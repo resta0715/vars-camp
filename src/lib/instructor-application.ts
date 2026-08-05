@@ -45,13 +45,17 @@ export const CONTACT_PREFERENCES = [
   { value: "admin", label: "管理側より連絡" },
 ] as const;
 
+export type { IndustryLink } from "@/types/database";
+import type { IndustryLink } from "@/types/database";
+
+export const EMPTY_INDUSTRY_LINK: IndustryLink = { name: "", url: "" };
+
 export type InstructorApplicationFormData = {
   full_name: string;
   phone: string;
   salon_location: string;
   avatar_url: string;
-  industries: string[];
-  website_urls: string[];
+  industry_links: IndustryLink[];
   strengths: string;
   training_topics: string;
   work_description: string;
@@ -71,8 +75,7 @@ export const EMPTY_APPLICATION_FORM: InstructorApplicationFormData = {
   phone: "",
   salon_location: "",
   avatar_url: "",
-  industries: [],
-  website_urls: [],
+  industry_links: [{ ...EMPTY_INDUSTRY_LINK }],
   strengths: "",
   training_topics: "",
   work_description: "",
@@ -117,11 +120,63 @@ export function validateApplicationPayload(
     }
   }
 
-  if (!Array.isArray(body.industries) || body.industries.length === 0) {
-    return "専門分野を1つ以上入力してください";
+  if (!Array.isArray(body.industry_links)) {
+    return "業種・専門分野を1つ以上入力してください";
+  }
+
+  const validLinks = normalizeIndustryLinks(body.industry_links);
+  if (validLinks.length === 0) {
+    return "業種・専門分野を1つ以上入力してください";
   }
 
   return null;
+}
+
+export function normalizeIndustryLinks(links: IndustryLink[] | undefined): IndustryLink[] {
+  if (!Array.isArray(links)) return [];
+  return links
+    .map((link) => ({
+      name: link.name?.trim() || "",
+      url: normalizeWebsiteUrl(link.url || ""),
+    }))
+    .filter((link) => link.name);
+}
+
+export function industryLinksToIndustries(links: IndustryLink[]): string[] {
+  return normalizeIndustryLinks(links).map((link) => link.name);
+}
+
+export function industryLinksToWebsiteUrls(links: IndustryLink[]): string[] {
+  return normalizeIndustryLinks(links)
+    .map((link) => link.url)
+    .filter(Boolean);
+}
+
+export function parseIndustryLinksFromProfile(profile: {
+  industry_links?: IndustryLink[] | null;
+  industries?: string[] | null;
+  website_urls?: string[] | null;
+  website_url?: string | null;
+}): IndustryLink[] {
+  if (Array.isArray(profile.industry_links) && profile.industry_links.length > 0) {
+    return profile.industry_links.map((link) => ({
+      name: link.name || "",
+      url: link.url || "",
+    }));
+  }
+
+  const names = profile.industries?.length ? profile.industries : [];
+  const urls = profile.website_urls?.length
+    ? profile.website_urls
+    : profile.website_url
+      ? [profile.website_url]
+      : [];
+  const count = Math.max(names.length, urls.length, 1);
+
+  return Array.from({ length: count }, (_, index) => ({
+    name: names[index] || "",
+    url: urls[index] || "",
+  }));
 }
 
 export function normalizeWebsiteUrl(raw: string): string {

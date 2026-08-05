@@ -4,6 +4,11 @@ export type BookingStatus = "confirmed" | "cancelled" | "attended" | "no_show";
 export type SubscriptionStatus = "active" | "cancelled" | "past_due" | "trialing" | "incomplete";
 export type InstructorApplicationStatus = "pending" | "approved" | "rejected";
 
+export interface IndustryLink {
+  name: string;
+  url: string;
+}
+
 export interface Profile {
   id: string;
   email: string | null;
@@ -17,6 +22,7 @@ export interface Profile {
   stripe_customer_id: string | null;
   // 講師プロフィール
   industries: string[] | null;
+  industry_links: IndustryLink[] | null;
   strengths: string | null;
   training_topics: string | null;
   work_description: string | null;
@@ -45,8 +51,7 @@ export interface InstructorApplicationPayload {
   phone?: string;
   salon_location: string;
   avatar_url?: string;
-  industries: string[];
-  website_urls?: string[];
+  industry_links: IndustryLink[];
   strengths?: string;
   training_topics?: string;
   work_description?: string;

@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { validateApplicationPayload, normalizeWebsiteUrls } from "@/lib/instructor-application";
+import {
+  validateApplicationPayload,
+  normalizeIndustryLinks,
+  industryLinksToIndustries,
+  industryLinksToWebsiteUrls,
+} from "@/lib/instructor-application";
 import type { InstructorApplicationFormData } from "@/lib/instructor-application";
 
 type GuestPayload = InstructorApplicationFormData & { email: string };
@@ -22,10 +27,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: validationError }, { status: 400 });
   }
 
-  const industries = body.industries.map((item) => item.trim()).filter(Boolean);
-  if (industries.length === 0) {
-    return NextResponse.json({ error: "専門分野を1つ以上入力してください" }, { status: 400 });
+  const industryLinks = normalizeIndustryLinks(body.industry_links);
+  if (industryLinks.length === 0) {
+    return NextResponse.json({ error: "業種・専門分野を1つ以上入力してください" }, { status: 400 });
   }
+
+  const industries = industryLinksToIndustries(industryLinks);
+  const website_urls = industryLinksToWebsiteUrls(industryLinks);
 
   const supabase = await createClient();
   const { error } = await supabase.from("instructor_application_submissions").insert({
@@ -36,8 +44,9 @@ export async function POST(request: Request) {
     phone: body.phone?.trim() || "",
     salon_location: body.salon_location.trim(),
     business_type: "",
+    industry_links: industryLinks,
     industries,
-    website_urls: normalizeWebsiteUrls(body.website_urls),
+    website_urls,
     strengths: body.strengths?.trim() || null,
     training_topics: body.training_topics?.trim() || null,
     work_description: body.work_description?.trim() || null,
