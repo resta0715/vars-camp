@@ -117,6 +117,63 @@ function TestLoginForm() {
   );
 }
 
+function EmailPasswordLoginForm({ redirect }: { redirect: string }) {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const supabase = createClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+
+    if (signInError) {
+      setError(signInError.message);
+      setLoading(false);
+      return;
+    }
+
+    router.push(redirect);
+    router.refresh();
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3 border-t border-gray-200 pt-4">
+      <p className="text-center text-xs font-medium text-gray-500">メールアドレスでログイン</p>
+      {error && (
+        <div className="rounded bg-red-50 px-3 py-2 text-xs text-red-700">{error}</div>
+      )}
+      <Input
+        type="email"
+        autoComplete="email"
+        placeholder="メールアドレス"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <Input
+        type="password"
+        autoComplete="current-password"
+        placeholder="パスワード"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+      <Button type="submit" variant="secondary" className="w-full" disabled={loading}>
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "メールでログイン"}
+      </Button>
+    </form>
+  );
+}
+
 type SignupRole = "stylist" | "instructor";
 
 function LoginForm() {
@@ -300,6 +357,8 @@ function LoginForm() {
           <Link href="/privacy" className="underline">プライバシーポリシー</Link>
           に同意したものとみなされます。
         </p>
+
+        {!isSignup && <EmailPasswordLoginForm redirect={redirect} />}
 
         <TestLoginForm />
       </CardContent>
