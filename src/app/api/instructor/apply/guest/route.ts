@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   validateApplicationPayload,
   normalizeIndustryLinks,
@@ -35,8 +35,8 @@ export async function POST(request: Request) {
   const industries = industryLinksToIndustries(industryLinks);
   const website_urls = industryLinksToWebsiteUrls(industryLinks);
 
-  const supabase = await createClient();
-  const { error } = await supabase.from("instructor_application_submissions").insert({
+  const admin = createAdminClient();
+  const { error } = await admin.from("instructor_application_submissions").insert({
     email: body.email.trim(),
     full_name: body.full_name.trim(),
     avatar_url: body.avatar_url?.trim() || null,

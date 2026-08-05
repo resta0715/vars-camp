@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, instructor_application_status")
+    .select("role, is_public, instructor_application_status")
     .eq("id", user.id)
     .single();
 
@@ -28,9 +28,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "プロフィールが見つかりません" }, { status: 404 });
   }
 
-  if (profile.role === "instructor" || profile.role === "admin") {
+  if (profile.role === "admin") {
     return NextResponse.json(
-      { error: "すでに講師として登録されています" },
+      { error: "管理者アカウントからは講師申込できません。別のメールアドレスでお試しください。" },
+      { status: 400 }
+    );
+  }
+
+  if (profile.instructor_application_status === "pending") {
+    return NextResponse.json(
+      { error: "すでに講師申込を送信済みです。審査結果をお待ちください。" },
+      { status: 400 }
+    );
+  }
+
+  if (profile.role === "instructor" && profile.is_public) {
+    return NextResponse.json(
+      { error: "すでに講師として公開されています。" },
       { status: 400 }
     );
   }

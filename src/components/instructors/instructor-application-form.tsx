@@ -82,6 +82,9 @@ export function InstructorApplicationForm() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
+  const [isPublicInstructor, setIsPublicInstructor] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -106,12 +109,15 @@ export function InstructorApplicationForm() {
         const { data: profile } = await supabase
           .from("profiles")
           .select(
-            "full_name, phone, salon_location, avatar_url, industry_links, industries, website_urls, website_url"
+            "full_name, phone, salon_location, avatar_url, industry_links, industries, website_urls, website_url, role, is_public, instructor_application_status"
           )
           .eq("id", user.id)
           .single();
 
         if (active && profile) {
+          setUserRole(profile.role);
+          setApplicationStatus(profile.instructor_application_status);
+          setIsPublicInstructor(Boolean(profile.is_public && profile.role === "instructor"));
           setForm((prev) => ({
             ...prev,
             full_name: profile.full_name || prev.full_name,
@@ -227,6 +233,15 @@ export function InstructorApplicationForm() {
     }
   };
 
+  const blockReason =
+    userRole === "admin"
+      ? "管理者アカウントからは講師申込できません。ログアウトするか、別のメールアドレスで送信してください。"
+      : applicationStatus === "pending"
+        ? "すでに講師申込を送信済みです。審査結果をお待ちください。"
+        : isPublicInstructor
+          ? "すでに講師として公開されています。"
+          : null;
+
   if (done) {
     return (
       <Card className="mx-auto max-w-lg">
@@ -258,6 +273,19 @@ export function InstructorApplicationForm() {
 
   return (
     <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-8">
+      {blockReason && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {blockReason}
+          {loggedIn && (
+            <p className="mt-2">
+              <Link href="/auth/login" className="font-medium underline">
+                別アカウントでログイン
+              </Link>
+              するか、ログアウトして未ログインのまま送信してください。
+            </p>
+          )}
+        </div>
+      )}
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -513,7 +541,7 @@ export function InstructorApplicationForm() {
       </Card>
 
       <div className="flex flex-col items-center gap-4 pb-8">
-        <Button type="submit" size="lg" disabled={submitting} className="min-w-[200px]">
+        <Button type="submit" size="lg" disabled={submitting || Boolean(blockReason)} className="min-w-[200px]">
           {submitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
