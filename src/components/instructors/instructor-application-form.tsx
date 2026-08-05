@@ -3,8 +3,7 @@
 import nextDynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +17,6 @@ import {
   INTEREST_LEVELS,
   LECTURE_FREQUENCIES,
   normalizeIndustryLinks,
-  parseIndustryLinksFromProfile,
   QA_PREFERENCES,
   TIME_SLOTS,
   type InstructorApplicationFormData,
@@ -73,22 +71,16 @@ function SelectField({
 }
 
 export function InstructorApplicationForm() {
-  const router = useRouter();
   const uploadSessionId = useMemo(() => crypto.randomUUID(), []);
   const [form, setForm] = useState<InstructorApplicationFormData>(EMPTY_APPLICATION_FORM);
   const [contactEmail, setContactEmail] = useState("");
-  const [createAccount, setCreateAccount] = useState(false);
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
-  const [isPublicInstructor, setIsPublicInstructor] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const [accountCreated, setAccountCreated] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -104,31 +96,18 @@ export function InstructorApplicationForm() {
 
         setLoggedIn(true);
         setUserEmail(user.email || "");
-        setContactEmail(user.email || "");
 
         const { data: profile } = await supabase
           .from("profiles")
-          .select(
-            "full_name, phone, salon_location, avatar_url, industry_links, industries, website_urls, website_url, role, is_public, instructor_application_status"
-          )
+          .select("role")
           .eq("id", user.id)
           .single();
 
         if (active && profile) {
           setUserRole(profile.role);
-          setApplicationStatus(profile.instructor_application_status);
-          setIsPublicInstructor(Boolean(profile.is_public && profile.role === "instructor"));
-          setForm((prev) => ({
-            ...prev,
-            full_name: profile.full_name || prev.full_name,
-            phone: profile.phone || prev.phone,
-            salon_location: profile.salon_location || prev.salon_location,
-            avatar_url: profile.avatar_url || prev.avatar_url,
-            industry_links: parseIndustryLinksFromProfile(profile),
-          }));
         }
       } catch {
-        // Supabase 未接続時もゲスト送信は可能
+        // 未ログイン送信は可能
       }
     })();
 
@@ -144,9 +123,25 @@ export function InstructorApplicationForm() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setLoggedIn(false);
+    setUserEmail("");
+    setUserRole(null);
+    setSigningOut(false);
+    window.location.reload();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (loggedIn) {
+      setError("美容師会員アカウントでログイン中です。ログアウトしてから送信してください。");
+      return;
+    }
 
     const industry_links = normalizeIndustryLinks(form.industry_links);
     if (industry_links.length === 0) {
@@ -154,66 +149,17 @@ export function InstructorApplicationForm() {
       return;
     }
 
-    const payload = { ...form, industry_links };
-    if (!loggedIn && !createAccount && !contactEmail.trim()) {
+    if (!contactEmail.trim()) {
       setError("メールアドレスを入力してください");
       return;
     }
 
-    if (createAccount && !loggedIn) {
-      if (!contactEmail.trim()) {
-        setError("アカウント作成にはメールアドレスが必要です");
-        return;
-      }
-      if (password.length < 8) {
-        setError("パスワードは8文字以上で設定してください");
-        return;
-      }
-      if (password !== passwordConfirm) {
-        setError("パスワードが一致しません");
-        return;
-      }
-    }
-
     setSubmitting(true);
     try {
-      const supabase = createClient();
-      let isAuthenticated = loggedIn;
-
-      if (createAccount && !loggedIn) {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email: contactEmail.trim(),
-          password,
-          options: { data: { full_name: form.full_name.trim() } },
-        });
-        if (signUpError) {
-          setError(signUpError.message);
-          setSubmitting(false);
-          return;
-        }
-
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: contactEmail.trim(),
-          password,
-        });
-        if (signInError) {
-          setError(
-            "アカウントは作成されましたがログインできませんでした。確認メールをご確認いただくか、ログイン画面からお試しください。"
-          );
-          setSubmitting(false);
-          return;
-        }
-        isAuthenticated = true;
-        setAccountCreated(true);
-      }
-
-      const endpoint = isAuthenticated ? "/api/instructor/apply" : "/api/instructor/apply/guest";
-      const body = isAuthenticated ? payload : { ...payload, email: contactEmail.trim() };
-
-      const res = await fetch(endpoint, {
+      const res = await fetch("/api/instructor/apply/guest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ ...form, industry_links, email: contactEmail.trim() }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -223,9 +169,6 @@ export function InstructorApplicationForm() {
       }
 
       setDone(true);
-      if (isAuthenticated) {
-        router.refresh();
-      }
     } catch {
       setError("通信エラーが発生しました。しばらくしてから再度お試しください。");
     } finally {
@@ -233,14 +176,13 @@ export function InstructorApplicationForm() {
     }
   };
 
-  const blockReason =
-    userRole === "admin"
-      ? "管理者アカウントからは講師申込できません。ログアウトするか、別のメールアドレスで送信してください。"
-      : applicationStatus === "pending"
-        ? "すでに講師申込を送信済みです。審査結果をお待ちください。"
-        : isPublicInstructor
-          ? "すでに講師として公開されています。"
-          : null;
+  const blockReason = loggedIn
+    ? userRole === "admin"
+      ? `管理者アカウント（${userEmail}）でログイン中です。講師申込は別の手続きのため、ログアウトしてから送信してください。`
+      : userRole === "instructor"
+        ? `講師アカウント（${userEmail}）でログイン中です。新規申込はログアウトしてから送信してください。`
+        : `美容師会員アカウント（${userEmail}）でログイン中です。講師申込と美容師会員登録は別のため、ログアウトしてから送信してください。`
+    : null;
 
   if (done) {
     return (
@@ -251,20 +193,13 @@ export function InstructorApplicationForm() {
           <p className="mt-3 text-sm leading-relaxed text-gray-600">
             ご協力ありがとうございます。ご記入いただいた連絡方法に沿って、運営からご連絡いたします。
           </p>
-          {accountCreated && (
-            <p className="mt-2 text-sm text-brand-700">
-              アカウントも作成済みです。次回からメールとパスワードでログインできます。
-            </p>
-          )}
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <p className="mt-2 text-xs text-gray-500">
+            承認後、講師として公開されます。美容師会員登録とは別の手続きです。
+          </p>
+          <div className="mt-6">
             <Button asChild>
               <Link href="/for-instructors">講師募集ページへ</Link>
             </Button>
-            {loggedIn || accountCreated ? (
-              <Button variant="outline" asChild>
-                <Link href="/dashboard">ダッシュボードへ</Link>
-              </Button>
-            ) : null}
           </div>
         </CardContent>
       </Card>
@@ -274,18 +209,33 @@ export function InstructorApplicationForm() {
   return (
     <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-8">
       {blockReason && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          {blockReason}
-          {loggedIn && (
-            <p className="mt-2">
-              <Link href="/auth/login" className="font-medium underline">
-                別アカウントでログイン
-              </Link>
-              するか、ログアウトして未ログインのまま送信してください。
-            </p>
-          )}
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
+          <p>{blockReason}</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={handleSignOut}
+            disabled={signingOut}
+          >
+            {signingOut ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="mr-2 h-4 w-4" />
+            )}
+            ログアウトして申込む
+          </Button>
         </div>
       )}
+
+      {!loggedIn && (
+        <div className="rounded-lg border border-brand-100 bg-brand-50/50 px-4 py-3 text-sm text-gray-700">
+          講師申込は<strong className="font-semibold">未ログイン</strong>で送信してください。
+          美容師会員登録（研修受講）とは別の手続きです。
+        </div>
+      )}
+
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -311,6 +261,7 @@ export function InstructorApplicationForm() {
               onChange={(e) => update("full_name", e.target.value)}
               placeholder="山田 太郎"
               required
+              disabled={Boolean(blockReason)}
             />
           </div>
           <div className="sm:col-span-2">
@@ -320,6 +271,7 @@ export function InstructorApplicationForm() {
               value={form.phone}
               onChange={(e) => update("phone", e.target.value)}
               placeholder="090-1234-5678"
+              disabled={Boolean(blockReason)}
             />
             <p className="mt-1.5 text-xs text-gray-500">
               任意です。入力された場合のみ、講師プロフィール等に表示されることがあります。
@@ -332,13 +284,14 @@ export function InstructorApplicationForm() {
               onChange={(e) => update("salon_location", e.target.value)}
               placeholder="東京都渋谷区"
               required
+              disabled={Boolean(blockReason)}
             />
           </div>
           <IndustryLinksInput
             links={form.industry_links}
             onChange={(industry_links) => update("industry_links", industry_links)}
             label={<FieldLabel required>業種・専門分野と Web/SNS</FieldLabel>}
-            description="業種（専門分野）と、対応する Web サイトや SNS の URL をセットで登録できます。例: 不動産仲介 → HP URL、グルメインフルエンサー → Instagram URL"
+            description="業種（専門分野）と、対応する Web サイトや SNS の URL をセットで登録できます。"
           />
         </CardContent>
       </Card>
@@ -356,6 +309,7 @@ export function InstructorApplicationForm() {
               value={form.strengths}
               onChange={(e) => update("strengths", e.target.value)}
               placeholder="経営、マーケティング、組織づくり など"
+              disabled={Boolean(blockReason)}
             />
           </div>
           <div>
@@ -365,6 +319,7 @@ export function InstructorApplicationForm() {
               value={form.training_topics}
               onChange={(e) => update("training_topics", e.target.value)}
               placeholder="サロン経営、スタッフ育成、数字の見える化 など"
+              disabled={Boolean(blockReason)}
             />
           </div>
           <div>
@@ -374,6 +329,7 @@ export function InstructorApplicationForm() {
               value={form.work_description}
               onChange={(e) => update("work_description", e.target.value)}
               placeholder="コンサルティング、セミナー講師、執筆・メディア など"
+              disabled={Boolean(blockReason)}
             />
           </div>
         </CardContent>
@@ -454,6 +410,7 @@ export function InstructorApplicationForm() {
                 checked={form.line_intro_ok}
                 onChange={(e) => update("line_intro_ok", e.target.checked)}
                 className="h-4 w-4 rounded border-gray-300"
+                disabled={Boolean(blockReason)}
               />
               公式LINEでのご紹介を希望する
             </label>
@@ -464,6 +421,7 @@ export function InstructorApplicationForm() {
               className={`${fieldClass} min-h-[100px]`}
               value={form.application_notes}
               onChange={(e) => update("application_notes", e.target.value)}
+              disabled={Boolean(blockReason)}
             />
           </div>
         </CardContent>
@@ -471,77 +429,38 @@ export function InstructorApplicationForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>連絡先</CardTitle>
+          <CardTitle>連絡先メール</CardTitle>
           <CardDescription>
-            {loggedIn
-              ? `美容師会員としてログイン中: ${userEmail}。ここから送信するのは講師登録の申込みで、承認までは受講者アカウントのままです。`
-              : "アンケート送信にはメールアドレスが必要です。美容師会員登録とは別の手続きです。"}
+            運営からの連絡先です。美容師会員登録のアカウントとは連動しません。
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {!loggedIn && (
-            <>
-              <div>
-                <FieldLabel required>メールアドレス</FieldLabel>
-                <Input
-                  type="email"
-                  value={contactEmail}
-                  onChange={(e) => setContactEmail(e.target.value)}
-                  placeholder="example@gmail.com"
-                  required
-                />
-              </div>
-              <label className="flex items-start gap-3 rounded-lg border border-gray-100 bg-gray-50 p-4">
-                <input
-                  type="checkbox"
-                  checked={createAccount}
-                  onChange={(e) => setCreateAccount(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-gray-300"
-                />
-                <span className="text-sm text-gray-700">
-                  <span className="font-medium text-gray-900">ログイン用アカウントも作成する（任意）</span>
-                  <br />
-                  美容師会員登録ではなく、次回以降のアンケート確認用です。講師として公開されるのは運営承認後です。
-                </span>
-              </label>
-              {createAccount && (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <FieldLabel required>パスワード（8文字以上）</FieldLabel>
-                    <Input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      minLength={8}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <FieldLabel required>パスワード（確認）</FieldLabel>
-                    <Input
-                      type="password"
-                      value={passwordConfirm}
-                      onChange={(e) => setPasswordConfirm(e.target.value)}
-                      minLength={8}
-                      required
-                    />
-                  </div>
-                </div>
-              )}
-              <p className="text-xs text-gray-500">
-                すでに美容師会員登録済みの方は{" "}
-                <Link href="/auth/login?redirect=/for-instructors/apply" className="text-brand-600 underline">
-                  ログイン
-                </Link>
-                してから送信してください。
-              </p>
-            </>
-          )}
+        <CardContent>
+          <FieldLabel required>メールアドレス</FieldLabel>
+          <Input
+            type="email"
+            value={contactEmail}
+            onChange={(e) => setContactEmail(e.target.value)}
+            placeholder="example@gmail.com"
+            required
+            disabled={Boolean(blockReason)}
+          />
+          <p className="mt-2 text-xs text-gray-500">
+            研修を受講する美容師の方は
+            <Link href="/auth/login?mode=signup" className="mx-1 text-brand-600 underline">
+              美容師会員登録
+            </Link>
+            をご利用ください（講師申込とは別です）。
+          </p>
         </CardContent>
       </Card>
 
       <div className="flex flex-col items-center gap-4 pb-8">
-        <Button type="submit" size="lg" disabled={submitting || Boolean(blockReason)} className="min-w-[200px]">
+        <Button
+          type="submit"
+          size="lg"
+          disabled={submitting || Boolean(blockReason)}
+          className="min-w-[200px]"
+        >
           {submitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -552,7 +471,7 @@ export function InstructorApplicationForm() {
           )}
         </Button>
         <p className="text-center text-xs text-gray-500">
-          送信内容は運営が確認し、ご記入の連絡方法でご連絡します。
+          送信内容は運営が確認し、承認後に講師一覧へ公開されます。
         </p>
       </div>
     </form>

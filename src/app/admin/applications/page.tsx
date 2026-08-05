@@ -381,7 +381,7 @@ export default function ApplicationsPage() {
               <ClipboardList className="mx-auto h-12 w-12 text-gray-300" />
               <p className="mt-4 text-gray-400">該当する申込がありません</p>
               <p className="mt-2 text-xs text-gray-400">
-                「未ログイン」はアンケートのみ、「ログイン済み」は美容師会員アカウントからの申込です
+                講師申込は未ログイン送信のみです（美容師会員登録とは別）
               </p>
             </div>
           ) : (

@@ -47,7 +47,7 @@ export default function InstructorApplyPage() {
               のお手続きで、内容確認後に運営が承認します。
             </p>
             <p className="mx-auto mt-2 max-w-xl text-xs text-gray-500">
-              すでに美容師会員の方も、ここから講師登録を申し込めます（承認までは受講者アカウントのままです）。
+              ログインは不要です。美容師会員アカウントでログイン中の方は、一度ログアウトしてから送信してください。
             </p>
           </div>
           <InstructorApplicationForm />

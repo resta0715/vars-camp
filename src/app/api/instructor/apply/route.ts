@@ -28,6 +28,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "プロフィールが見つかりません" }, { status: 404 });
   }
 
+  if (profile.role === "free" || profile.role === "subscriber") {
+    return NextResponse.json(
+      {
+        error:
+          "美容師会員アカウントからは講師申込できません。ログアウトして、アンケートを未ログインで送信してください。",
+      },
+      { status: 400 }
+    );
+  }
+
   if (profile.role === "admin") {
     return NextResponse.json(
       { error: "管理者アカウントからは講師申込できません。別のメールアドレスでお試しください。" },
